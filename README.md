@@ -81,11 +81,6 @@ A simple Java-based Discord bot integrated with Twitch functionality. This bot u
 
 ---
 
-## License
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
----
-
 ## Acknowledgments
 - [JDA](https://github.com/DV8FromTheWorld/JDA) for the powerful Discord API.
 - [dotenv](https://github.com/cdimascio/java-dotenv) for environment variable management.
