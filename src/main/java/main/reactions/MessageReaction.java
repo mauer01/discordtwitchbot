@@ -5,11 +5,11 @@ import io.github.cdimascio.dotenv.Dotenv;
 import main.Categories;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
-public class NachrichtenReaktion extends ListenerAdapter {
+public class MessageReaction extends ListenerAdapter {
     Dotenv dotenv = Dotenv.load();
     private final String discord_bot_id = dotenv.get("DISCORD_BOT_ID");
     private Categories currentcategories;
-    public NachrichtenReaktion(Categories current){
+    public MessageReaction(Categories current){
         this.currentcategories = current;
 
     }

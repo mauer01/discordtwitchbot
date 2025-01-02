@@ -6,7 +6,7 @@ import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.requests.GatewayIntent;
-import main.reactions.NachrichtenReaktion;
+import main.reactions.MessageReaction;
 
 public class DiscordTwitchBot {
     public static void main(String[] args) {
@@ -21,7 +21,7 @@ public class DiscordTwitchBot {
         JDABuilder builder = JDABuilder.createDefault(token);
         builder.setStatus(OnlineStatus.ONLINE);
         builder.setActivity(Activity.playing(status));
-        builder.addEventListeners(new NachrichtenReaktion(currentcategories));
+        builder.addEventListeners(new MessageReaction(currentcategories));
         builder.enableIntents(GatewayIntent.MESSAGE_CONTENT);
         JDA bot = builder.build();
         MyTwitch twitch = new MyTwitch(twitchClientId, twitchClientSecret);
