@@ -24,7 +24,7 @@ public class Category extends Thread{
         return this.isstopped.get();
     }
     public void addChannel(String channelid){
-        if (!ChannelIds.contains(channelid)){    
+        if (!channelidexists(channelid).get()){    
             ChannelIds.add(channelid);
             sendstreamer(channelid);
         }
