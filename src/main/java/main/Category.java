@@ -7,7 +7,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import net.dv8tion.jda.api.*;
 
 public class Category extends Thread{
-    private List<String> Streamer = new ArrayList<>();
+    private ConcurrentLinkedQueue<String> Streamer = new ConcurrentLinkedQueue<>();
     private ConcurrentLinkedQueue<String> ChannelIds = new ConcurrentLinkedQueue<>();
     private String categoryname;
     private MyTwitch twitchapi;
@@ -24,16 +24,21 @@ public class Category extends Thread{
         return this.isstopped.get();
     }
     public void addChannel(String channelid){
-        ChannelIds.add(channelid);
-        sendstreamer(channelid);
+        if (!ChannelIds.contains(channelid)){    
+            ChannelIds.add(channelid);
+            sendstreamer(channelid);
+        }
     }
 
     public void sendstreamer(String channelid){
-        StringBuilder message = new StringBuilder("These currently streaming: " + categoryname + ":");
-        Streamer.forEach((streamer) -> {
-            message.append("\nhttps://www.twitch.tv/").append(streamer);
-        });
-        bot.getTextChannelById(channelid).sendMessage(message.toString()).queue();
+        if(!Streamer.isEmpty()){    
+            StringBuilder message = new StringBuilder("These currently streaming: " + categoryname + ":");
+            Streamer.forEach((streamer) -> {
+                message.append("\nhttps://www.twitch.tv/").append(streamer);
+            });
+            bot.getTextChannelById(channelid).sendMessage(message.toString()).queue();
+        }
+        bot.getTextChannelById(channelid).sendMessage("Nobody is currently Streaming: " + categoryname).queue();
     }
 
     public void removeChannel(String channelid) {
@@ -89,7 +94,7 @@ public class Category extends Thread{
         }
     }
 
-    List<String> getStreamer(){
+    ConcurrentLinkedQueue<String> getStreamer(){
         return this.Streamer;
     }
 
