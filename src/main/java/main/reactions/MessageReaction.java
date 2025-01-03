@@ -32,6 +32,8 @@ public class MessageReaction extends ListenerAdapter {
                 this.currentcategories.removeCategory(event.getMessage().getContentRaw().substring(8), event.getChannel().getId());
             }else if(messagecontent.contains("!")){
                 event.getChannel().sendMessage("no idea what you want from me").queue();
+            }else if(messagecontent.contains("!exit")){
+                System.exit(0);
             }
         }
     }
