@@ -32,25 +32,10 @@
             <artifactId>dotenv-java</artifactId>
             <version>3.0.0</version>
         </dependency>
-
     </dependencies>
 
     <build>
         <plugins>
-            <!-- Plugin to create a normal .jar -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <version>3.3.0</version>
-                <configuration>
-                    <archive>
-                        <manifest>
-                            <mainClass>main.DiscordTwitchBot</mainClass>
-                        </manifest>
-                    </archive>
-                </configuration>
-            </plugin>
-
             <!-- Plugin to create a Fat JAR with dependencies -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -73,6 +58,47 @@
                         <goals>
                             <goal>single</goal>
                         </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Skip default JAR creation -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.3.0</version>
+                <executions>
+                    <execution>
+                        <id>default-jar</id>
+                        <phase>none</phase>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Copy .env file to target folder -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>3.3.0</version>
+                <executions>
+                    <execution>
+                        <id>copy-env</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>resources</goal>
+                        </goals>
+                        <configuration>
+                            <resources>
+                                <resource>
+                                    <directory>${basedir}</directory>
+                                    <includes>
+                                        <include>.env</include>
+                                    </includes>
+                                    <filtering>false</filtering>
+                                </resource>
+                            </resources>
+                            <outputDirectory>${project.build.directory}</outputDirectory>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
