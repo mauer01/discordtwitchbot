@@ -1,5 +1,6 @@
 package main;
 
+import java.io.FileWriter;
 import java.util.*;
 
 import main.exceptions.NotFound;
@@ -10,6 +11,24 @@ public class Categories{
     private MyTwitch twitch;
     private JDA bot;
     public Categories(){
+        Runtime.getRuntime().addShutdownHook(new Shutdownhook(categorylist));
+        }
+
+    public void shutdownhook(){
+        try {
+            FileWriter categoriestext = new FileWriter("categories.txt");
+            for (Category category : categorylist) {
+                categoriestext.write(category.getcategoryname() + "\n");
+                for (String channelid : category.getChannelIds()) {
+                    categoriestext.write(channelid + "\n");
+                }
+            }
+
+        categoriestext.close();
+        } catch (Exception e) {
+            System.out.println(e); // TODO: handle exception
+        }
+        
     }
     public void setparams(MyTwitch x, JDA y){
         this.twitch = x;
