@@ -2,6 +2,9 @@
 
 A simple Java-based Discord bot integrated with Twitch functionality. This bot utilizes the [JDA (Java Discord API)](https://github.com/DV8FromTheWorld/JDA) for interacting with Discord and connects to Twitch for additional features.
 
+Invite Link:
+https://discord.com/oauth2/authorize?client_id=1170492845006802944&permissions=18432&integration_type=0&scope=bot
+
 ## Features
 - Responds to Discord messages with custom reactions.
 - Monitors Twitch streams using provided credentials.
