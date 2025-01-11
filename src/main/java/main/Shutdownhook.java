@@ -10,13 +10,12 @@ public class Shutdownhook extends Thread{;
         
     }
     public void run(){
-        System.out.println("Shutdownhook happened");
         try {
             FileWriter categoriestext = new FileWriter("categories.txt");
             for (Category category : categorylist) {
                 categoriestext.write("category:" + category.getcategoryname() + "\n");
                 for (String channelid : category.getChannelIds()) {
-                    categoriestext.write("id" + channelid + "\n");
+                    categoriestext.write("id:" + channelid + "\n");
                 }
             }
 

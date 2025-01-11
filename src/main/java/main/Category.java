@@ -82,7 +82,6 @@ public class Category extends Thread{
     void newStreamer(String x){
         StringBuilder message = new StringBuilder("New streamer is currently streaming " + categoryname + ":");
         message.append("\nhttps://www.twitch.tv/").append(x);
-        System.out.println(message);
         ChannelIds.forEach((channelid) -> bot.getTextChannelById(channelid).sendMessage(message.toString()).queue());
     }
 
