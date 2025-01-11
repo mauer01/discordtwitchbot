@@ -32,13 +32,14 @@ public class Category extends Thread{
 
     public void sendstreamer(String channelid){
         if(!Streamer.isEmpty()){    
-            StringBuilder message = new StringBuilder("These currently streaming: " + categoryname + ":");
+            StringBuilder message = new StringBuilder("currently streaming: " + categoryname + ":");
             Streamer.forEach((streamer) -> {
                 message.append("\nhttps://www.twitch.tv/").append(streamer);
             });
             bot.getTextChannelById(channelid).sendMessage(message.toString()).queue();
+        }else if(ChannelIds.size() > 1){
+            bot.getTextChannelById(channelid).sendMessage("Nobody is currently Streaming: " + categoryname).queue();
         }
-        bot.getTextChannelById(channelid).sendMessage("Nobody is currently Streaming: " + categoryname).queue();
     }
 
     public void removeChannel(String channelid) {
