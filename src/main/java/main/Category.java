@@ -49,17 +49,14 @@ public class Category extends Thread{
     }
 
     public void run(){
-        
-        while(!isstopped.get()){
+        List<String> currentstreamer;
+        while(!isstopped()){
             try{
                 Thread.sleep(10000);
             } catch(Exception e){
                 System.err.println(e);
             }
-            List<String> currentstreamer = twitchapi.getstreamer(this.categoryname);
-            if (currentstreamer == null) {
-                currentstreamer = new ArrayList<>();
-            }
+            currentstreamer = twitchapi.getstreamer(this.categoryname);
             if(currentstreamer.size()>0){
                 for (String participant:currentstreamer){
                     addStreamer(participant);
@@ -85,7 +82,6 @@ public class Category extends Thread{
         StringBuilder message = new StringBuilder("New streamer is currently streaming " + categoryname + ":");
         message.append("\nhttps://www.twitch.tv/").append(x);
         ChannelIds.forEach((channelid) -> bot.getTextChannelById(channelid).sendMessage(message.toString()).queue());
-        ;
     }
 
     void removeStreamer(String x){
