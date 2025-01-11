@@ -21,45 +21,45 @@ public class MyTwitch {
         this.getaccesstoken();
     }
 
-public List<String> getstreamer(String categoryname) {
-    List<String> streamerList = new ArrayList<>();
+    public List<String> getstreamer(String categoryname) {
+        List<String> streamerList = new ArrayList<>();
 
-    try {
-        int categoryId = getcategoryid(categoryname);
-        for (int attempt = 0; attempt < 2; attempt++) {
-            HttpResponse<JsonNode> response = Unirest.get("https://api.twitch.tv/helix/streams")
-                    .queryString("game_id", categoryId)
-                    .queryString("first", 100)
-                    .header("Client-ID", this.clientID)
-                    .header("Authorization", "Bearer " + this.accesstoken)
-                    .asJson();
+        try {
+            int categoryId = getcategoryid(categoryname);
+            for (int attempt = 0; attempt < 2; attempt++) {
+                HttpResponse<JsonNode> response = Unirest.get("https://api.twitch.tv/helix/streams")
+                        .queryString("game_id", categoryId)
+                        .queryString("first", 100)
+                        .header("Client-ID", this.clientID)
+                        .header("Authorization", "Bearer " + this.accesstoken)
+                        .asJson();
 
-            if (response.getStatus() == 200) {
-                JSONArray data = response.getBody().getObject().optJSONArray("data");
-                if (data != null) {
-                    for (int i = 0; i < data.length(); i++) {
-                        String userName = data.getJSONObject(i).getString("user_name");
-                        streamerList.add(userName);
+                if (response.getStatus() == 200) {
+                    JSONArray data = response.getBody().getObject().optJSONArray("data");
+                    if (data != null) {
+                        for (int i = 0; i < data.length(); i++) {
+                            String userName = data.getJSONObject(i).getString("user_name");
+                            streamerList.add(userName);
+                        }
+                    } else {
+                        System.out.println("Keine Streamer gefunden für Kategorie: " + categoryname);
                     }
+                    return streamerList;
+                } else if (response.getStatus() == 401 && attempt == 0) {
+                    System.err.println("Token ungültig. Erneut versuchen...");
+                    this.getaccesstoken();
                 } else {
-                    System.out.println("Keine Streamer gefunden für Kategorie: " + categoryname);
+                    System.err.println("Fehler bei Twitch-API-Anfrage. Status: " + response.getStatus());
+                    System.err.println("Antwort: " + response.getBody());
                 }
-                return streamerList;
-            } else if (response.getStatus() == 401 && attempt == 0) {
-                System.err.println("Token ungültig. Erneut versuchen...");
-                this.getaccesstoken();
-            } else {
-                System.err.println("Fehler bei Twitch-API-Anfrage. Status: " + response.getStatus());
-                System.err.println("Antwort: " + response.getBody());
             }
+        } catch (Exception e) {
+            System.err.println("Fehler in getstreamer für Kategorie: " + categoryname);
+            e.printStackTrace();
         }
-    } catch (Exception e) {
-        System.err.println("Fehler in getstreamer für Kategorie: " + categoryname);
-        e.printStackTrace();
-    }
 
-    return streamerList; 
-}
+        return streamerList; 
+    }
 
 
     private void getaccesstoken() {
