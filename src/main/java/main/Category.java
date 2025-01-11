@@ -37,7 +37,7 @@ public class Category extends Thread{
                 message.append("\nhttps://www.twitch.tv/").append(streamer);
             });
             bot.getTextChannelById(channelid).sendMessage(message.toString()).queue();
-        }else if(ChannelIds.size() > 1 && Streamer.isEmpty()){
+        }else if((ChannelIds.size() > 1 && Streamer.isEmpty())){
             bot.getTextChannelById(channelid).sendMessage("Nobody is currently Streaming: " + categoryname).queue();
         }
     }
@@ -76,14 +76,33 @@ public class Category extends Thread{
             this.newStreamer(x);
         }
     }
-    void stopthread(){
-        isstopped.set(true);
+    void addStreamer(List<String> x){
+        x.forEach((streamer) -> {
+            if(!this.Streamer.contains(streamer)){
+                this.Streamer.add(streamer);
+            }else{
+                x.remove(streamer);
+            }
+        });
+        this.newStreamer(x);
     }
+
+
     void newStreamer(String x){
         StringBuilder message = new StringBuilder("New streamer is currently streaming " + categoryname + ":");
         message.append("\nhttps://www.twitch.tv/").append(x);
         ChannelIds.forEach((channelid) -> bot.getTextChannelById(channelid).sendMessage(message.toString()).queue());
     }
+
+    void newStreamer(List<String> x){
+        StringBuilder message = new StringBuilder("Streamers are currently streaming " + categoryname + ":");
+        x.forEach((streamer) -> {
+            message.append("\nhttps://www.twitch.tv/").append(streamer);
+        });
+        ChannelIds.forEach((channelid) -> bot.getTextChannelById(channelid).sendMessage(message.toString()).queue());
+    }
+
+
 
     void removeStreamer(String x){
         if(this.Streamer.contains(x)){
@@ -109,4 +128,9 @@ public class Category extends Thread{
     public String[] getChannelIds() {
         return ChannelIds.toArray(new String[0]);
     }
+
+    void stopthread(){
+        isstopped.set(true);
+    }
+    
 }
