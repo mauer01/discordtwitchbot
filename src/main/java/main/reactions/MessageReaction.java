@@ -10,6 +10,7 @@ public class MessageReaction extends ListenerAdapter {
     Dotenv dotenv = Dotenv.load();
     private final String discord_bot_id = dotenv.get("DISCORD_BOT_ID");
     private Categories currentcategories;
+    private final String commandidentifier = "!";
     public MessageReaction(Categories current){
         this.currentcategories = current;
 
@@ -19,17 +20,15 @@ public class MessageReaction extends ListenerAdapter {
         if (!event.getMember().hasPermission(Permission.MANAGE_SERVER)) return;
         String messagecontent = event.getMessage().getContentRaw();
         if (event.isFromGuild()) {
-            if(messagecontent.equals("!ping")) {
+            if(messagecontent.equals(commandidentifier + "ping")) {
                 event.getChannel().sendMessage(event.getChannel().getId()).queue();
-            }else if (messagecontent.contains("!getlist")) {
+            }else if (messagecontent.contains(commandidentifier + "getlist")) {
                 event.getChannel().sendMessage(currentcategories.toString(event.getChannel().getId())).queue();
-            }else if(messagecontent.contains("!add")){
+            }else if(messagecontent.contains(commandidentifier + "add")){
                 this.currentcategories.addCategory(event.getMessage().getContentRaw().substring(5), event.getChannel().getId());
-            }else if(messagecontent.contains("!remove")){
+            }else if(messagecontent.contains(commandidentifier + "remove")){
                 this.currentcategories.removeCategory(event.getMessage().getContentRaw().substring(8), event.getChannel().getId());
-            }else if(messagecontent.contains("!")){
-                event.getChannel().sendMessage("no idea what you want from me").queue();
-            }
+            }            }
         }
     }
 }
