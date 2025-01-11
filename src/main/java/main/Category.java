@@ -37,7 +37,7 @@ public class Category extends Thread{
                 message.append("\nhttps://www.twitch.tv/").append(streamer);
             });
             bot.getTextChannelById(channelid).sendMessage(message.toString()).queue();
-        }else if(ChannelIds.size() > 1){
+        }else if(ChannelIds.size() > 1 && Streamer.isEmpty()){
             bot.getTextChannelById(channelid).sendMessage("Nobody is currently Streaming: " + categoryname).queue();
         }
     }
@@ -106,5 +106,8 @@ public class Category extends Thread{
         }
         return bool;
 
+    }
+    public String[] getChannelIds() {
+        return ChannelIds.toArray(new String[0]);
     }
 }

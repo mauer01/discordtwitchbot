@@ -12,6 +12,7 @@ target/
 *.iml
 *.ipr
 deploy
+categories.txt
 
 ### Eclipse ###
 .apt_generated
