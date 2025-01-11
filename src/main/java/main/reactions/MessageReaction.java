@@ -20,7 +20,6 @@ public class MessageReaction extends ListenerAdapter {
             authorid = discord_bot_id;
         }
         String messagecontent = event.getMessage().getContentRaw();
-        System.out.println(messagecontent);
         if (event.isFromGuild() && !authorid.equals(discord_bot_id)) {
             if(messagecontent.equals("!ping")) {
                 event.getChannel().sendMessage(event.getChannel().getId()).queue();
