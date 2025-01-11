@@ -3,6 +3,7 @@ package main.reactions;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import io.github.cdimascio.dotenv.Dotenv;
 import main.Categories;
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
 public class MessageReaction extends ListenerAdapter {
@@ -14,13 +15,10 @@ public class MessageReaction extends ListenerAdapter {
 
     }
     public void onMessageReceived(MessageReceivedEvent event) {
-        String authorid;
-        authorid = event.getAuthor().getAvatarId();
-        if (authorid == null){
-            authorid = discord_bot_id;
-        }
+        if (event.getAuthor().isBot()) return;
+        if (!event.getMember().hasPermission(Permission.MANAGE_SERVER)) return;
         String messagecontent = event.getMessage().getContentRaw();
-        if (event.isFromGuild() && !authorid.equals(discord_bot_id)) {
+        if (event.isFromGuild()) {
             if(messagecontent.equals("!ping")) {
                 event.getChannel().sendMessage(event.getChannel().getId()).queue();
             }else if (messagecontent.contains("!getlist")) {
