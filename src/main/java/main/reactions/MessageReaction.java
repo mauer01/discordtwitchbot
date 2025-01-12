@@ -8,7 +8,6 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
 public class MessageReaction extends ListenerAdapter {
     Dotenv dotenv = Dotenv.load();
-    private final String discord_bot_id = dotenv.get("DISCORD_BOT_ID");
     private Categories currentcategories;
     private final String commandidentifier = "!";
     public MessageReaction(Categories current){
@@ -28,7 +27,7 @@ public class MessageReaction extends ListenerAdapter {
                 this.currentcategories.addCategory(event.getMessage().getContentRaw().substring(5), event.getChannel().getId());
             }else if(messagecontent.contains(commandidentifier + "remove")){
                 this.currentcategories.removeCategory(event.getMessage().getContentRaw().substring(8), event.getChannel().getId());
-            }            }
+            }
         }
     }
 }
