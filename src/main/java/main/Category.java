@@ -7,7 +7,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import net.dv8tion.jda.api.*;
 
 public class Category extends Thread{
-    private ConcurrentLinkedQueue<String> Streamer = new ConcurrentLinkedQueue<>();
+    private ConcurrentLinkedQueue<Streamer> Streamer = new ConcurrentLinkedQueue<>();
     private ConcurrentLinkedQueue<String> ChannelIds = new ConcurrentLinkedQueue<>();
     private String categoryname;
     private MyTwitch twitchapi;
@@ -50,33 +50,49 @@ public class Category extends Thread{
     }
 
     public void run(){
-        List<String> currentstreamer;
+        List<Streamer> currentstreamer = new ArrayList<>();
+        
         while(!isstopped()){
             try{
                 Thread.sleep(10000);
             } catch(Exception e){
                 System.err.println(e);
             }
-            currentstreamer = twitchapi.getstreamer(this.categoryname);
+            twitchapi.getstreamer(this.categoryname).forEach((stuff) -> {
+                currentstreamer.add(new Streamer(stuff));
+            });
             if(currentstreamer.size()>0){
-                for (String participant:currentstreamer){
+                for (Streamer participant:currentstreamer){
                     addStreamer(participant);
                 }
             } 
             if(Streamer.size()>0){
-                Streamer.retainAll(currentstreamer);  
+                Streamer.forEach((streamer) -> {
+                    if (currentstreamer.contains(streamer) && (streamer.getLastseen().getTime() - new Date().getTime() > 1000*60*60)){
+                        currentstreamer.remove(streamer);
+                    }
+                });
+                if(currentstreamer.size()>0){
+                    addStreamer(currentstreamer);
+                }
             }
         }
 
     }
 
-    void addStreamer(String x){
+    void addStreamer(Streamer x){
         if(!this.Streamer.contains(x)){
             this.Streamer.add(x);
             this.newStreamer(x);
+        }else{
+            this.Streamer.forEach((streamer) -> {
+                if(streamer.getName().equals(x.getName())){
+                    streamer.setLastseen(new Date());
+                }
+            });
         }
     }
-    void addStreamer(List<String> x){
+    void addStreamer(List<Streamer> x){
         x.forEach((streamer) -> {
             if(!this.Streamer.contains(streamer)){
                 this.Streamer.add(streamer);
@@ -88,16 +104,16 @@ public class Category extends Thread{
     }
 
 
-    void newStreamer(String x){
+    void newStreamer(Streamer x){
         StringBuilder message = new StringBuilder("New streamer is currently streaming " + categoryname + ":");
-        message.append("\nhttps://www.twitch.tv/").append(x);
+        message.append("\nhttps://www.twitch.tv/").append(x.getName());
         ChannelIds.forEach((channelid) -> bot.getTextChannelById(channelid).sendMessage(message.toString()).queue());
     }
 
-    void newStreamer(List<String> x){
+    void newStreamer(List<Streamer> x){
         StringBuilder message = new StringBuilder("Streamers are currently streaming " + categoryname + ":");
         x.forEach((streamer) -> {
-            message.append("\nhttps://www.twitch.tv/").append(streamer);
+            message.append("\nhttps://www.twitch.tv/").append(streamer.getName());
         });
         ChannelIds.forEach((channelid) -> bot.getTextChannelById(channelid).sendMessage(message.toString()).queue());
     }
@@ -110,7 +126,7 @@ public class Category extends Thread{
         }
     }
 
-    ConcurrentLinkedQueue<String> getStreamer(){
+    ConcurrentLinkedQueue<Streamer> getStreamer(){
         return this.Streamer;
     }
 
