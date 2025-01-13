@@ -1,22 +1,18 @@
 package main;
 
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
-import java.util.logging.FileHandler;
 
 import io.github.cdimascio.dotenv.Dotenv;
+import main.reactions.MessageReaction;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.requests.GatewayIntent;
-import main.reactions.MessageReaction;
 
 public class DiscordTwitchBot {
     public static void main(String[] args) {
@@ -37,13 +33,13 @@ public class DiscordTwitchBot {
         MyTwitch twitch = new MyTwitch(twitchClientId, twitchClientSecret);
         try {
             bot.awaitReady();
-        } catch (Exception e) {
+        } catch (InterruptedException e) {
             System.err.println(e);
         }
         currentcategories.setparams(twitch, bot);
         try {
             List<String> lines = Files.readAllLines(Path.of("categories.txt"), StandardCharsets.US_ASCII);
-            String[] linesArray = lines.toArray(new String[0]);
+            String[] linesArray = lines.toArray(String[]::new);
             String currentcategory = "";
             for (String line : linesArray) {
                 String context = line.split(":")[0];
