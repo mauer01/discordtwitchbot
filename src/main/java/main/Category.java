@@ -1,18 +1,18 @@
 package main;
 
-import java.util.*;
+import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import net.dv8tion.jda.api.*;
+import net.dv8tion.jda.api.JDA;
 
 public class Category extends Thread{
-    private ConcurrentLinkedQueue<String> Streamer = new ConcurrentLinkedQueue<>();
-    private ConcurrentLinkedQueue<String> ChannelIds = new ConcurrentLinkedQueue<>();
-    private String categoryname;
-    private MyTwitch twitchapi;
+    private final ConcurrentLinkedQueue<String> Streamer = new ConcurrentLinkedQueue<>();
+    private final ConcurrentLinkedQueue<String> ChannelIds = new ConcurrentLinkedQueue<>();
+    private final String categoryname;
+    private final MyTwitch twitchapi;
     private final AtomicBoolean isstopped = new AtomicBoolean(false);
-    private JDA bot;
+    private final JDA bot;
     public Category(String categoryname, MyTwitch API,JDA discordapi){
 
         this.categoryname = categoryname;
@@ -70,12 +70,17 @@ public class Category extends Thread{
 
     }
 
+    public String[] getChannelIds() {
+        return ChannelIds.toArray(new String[0]);
+    }
     void addStreamer(String x){
         if(!this.Streamer.contains(x)){
             this.Streamer.add(x);
             this.newStreamer(x);
         }
     }
+
+
     void addStreamer(List<String> x){
         x.forEach((streamer) -> {
             if(!this.Streamer.contains(streamer)){
@@ -87,12 +92,13 @@ public class Category extends Thread{
         this.newStreamer(x);
     }
 
-
     void newStreamer(String x){
         StringBuilder message = new StringBuilder("New streamer is currently streaming " + categoryname + ":");
         message.append("\nhttps://www.twitch.tv/").append(x);
         ChannelIds.forEach((channelid) -> bot.getTextChannelById(channelid).sendMessage(message.toString()).queue());
     }
+
+
 
     void newStreamer(List<String> x){
         StringBuilder message = new StringBuilder("Streamers are currently streaming " + categoryname + ":");
@@ -101,8 +107,6 @@ public class Category extends Thread{
         });
         ChannelIds.forEach((channelid) -> bot.getTextChannelById(channelid).sendMessage(message.toString()).queue());
     }
-
-
 
     void removeStreamer(String x){
         if(this.Streamer.contains(x)){
@@ -113,7 +117,6 @@ public class Category extends Thread{
     ConcurrentLinkedQueue<String> getStreamer(){
         return this.Streamer;
     }
-
     String getcategoryname(){
         return this.categoryname;
     }
@@ -124,9 +127,6 @@ public class Category extends Thread{
         }
         return bool;
 
-    }
-    public String[] getChannelIds() {
-        return ChannelIds.toArray(new String[0]);
     }
 
     void stopthread(){

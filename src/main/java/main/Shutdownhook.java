@@ -21,7 +21,7 @@ public class Shutdownhook extends Thread{;
 
         categoriestext.close();
         } catch (Exception e) {
-            System.out.println(e); // TODO: handle exception
+            System.out.println(e);
         }
         
     }
