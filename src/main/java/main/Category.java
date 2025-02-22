@@ -1,15 +1,16 @@
 package main;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import net.dv8tion.jda.api.JDA;
 
 public class Category extends Thread {
-    private final Map<String, Integer> Streamer = new HashMap<>();
+    private final Map<String, Integer> Streamer = new ConcurrentHashMap<>();
     private final ConcurrentLinkedQueue<String> ChannelIds = new ConcurrentLinkedQueue<>();
     private final String categoryname;
     private final MyTwitch twitchapi;
@@ -62,12 +63,14 @@ public class Category extends Thread {
             } catch (Exception e) {
                 System.err.println(e);
             }
+            List<String> keystoremove = new ArrayList<>();
             Streamer.forEach((e, i) -> {
                 if (Streamer.get(e) > 5) {
-                    Streamer.remove(e);
+                    keystoremove.add(e);
                 }
-                Streamer.put(e, i + 1);
+                Streamer.replace(e, i + 1);
             });
+            keystoremove.forEach(Streamer::remove); 
             currentstreamer = twitchapi.getstreamer(this.categoryname);
             if (currentstreamer.size() > 0) {
                 for (String participant : currentstreamer) {
