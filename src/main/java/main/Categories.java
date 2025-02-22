@@ -1,22 +1,26 @@
 package main;
 
+import java.io.File;
 import java.io.FileWriter;
 import java.util.*;
 
 import main.exceptions.NotFound;
 import net.dv8tion.jda.api.JDA;
 
-public class Categories{
+public class Categories {
     private List<Category> categorylist = new ArrayList<>();
     private MyTwitch twitch;
     private JDA bot;
-    public Categories(){
-        Runtime.getRuntime().addShutdownHook(new Shutdownhook(categorylist));
-        }
 
-    public void shutdownhook(){
+    public Categories() {
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            shutdownhook();
+        }, "Shutdown-thread"));
+    }
+
+    public void shutdownhook() {
         try {
-            FileWriter categoriestext = new FileWriter("categories.txt");
+            FileWriter categoriestext = new FileWriter("categories.tmp");
             for (Category category : categorylist) {
                 categoriestext.write(category.getcategoryname() + "\n");
                 for (String channelid : category.getChannelIds()) {
@@ -24,77 +28,82 @@ public class Categories{
                 }
             }
 
-        categoriestext.close();
+            categoriestext.close();
         } catch (Exception e) {
-            System.out.println(e); 
+            System.out.println(e);
+            return;
         }
-        
+        new File("categories.tmp").renameTo(new File("categories.txt"));
     }
-    public void setparams(MyTwitch x, JDA y){
+
+    public void setparams(MyTwitch x, JDA y) {
         this.twitch = x;
         this.bot = y;
     }
-    
-    public void addCategory(String x,String channelid){
+
+    public void addCategory(String x, String channelid) {
         try {
             Category y = getcategorybyname(x);
             y.addChannel(channelid);
-        } catch(NotFound e) {
-            Category temp = new Category(x,twitch,bot);
+        } catch (NotFound e) {
+            Category temp = new Category(x, twitch, bot);
             temp.addChannel(channelid);
             this.categorylist.add(temp);
         }
     }
-    public List<Category> getCategories(){
+
+    public List<Category> getCategories() {
         return this.categorylist;
     }
-    public void removeCategory(String name, String channel){
+
+    public void removeCategory(String name, String channel) {
         Category x;
         try {
             x = getcategorybyname(name);
             x.removeChannel(channel);
-            
-            if(x.isstopped()){
+
+            if (x.isstopped()) {
                 categorylist.remove(x);
             }
         } catch (NotFound e) {
-            System.out.println("\""+ name + "\" "  + e.getMessage());
+            System.out.println("\"" + name + "\" " + e.getMessage());
         }
     }
 
-    public Category getcategorybyname(String x) throws NotFound{
+    public Category getcategorybyname(String x) throws NotFound {
         for (Category category : categorylist) {
-            if (category.getcategoryname().equals(x)){
+            if (category.getcategoryname().equals(x)) {
                 return category;
             }
         }
         throw new NotFound("category not in list");
     }
 
-    public String toString(){
+    public String toString() {
         StringBuilder message = new StringBuilder();
-        if (!categorylist.isEmpty()){
+        if (!categorylist.isEmpty()) {
             for (Category category : categorylist) {
                 message.append(category.getcategoryname());
                 message.append(System.getProperty("line.separator"));
             }
-        }else{
+        } else {
             message.append("there are no categories set yet.");
         }
         return message.toString();
     }
-    public String toString(String channelId){
+
+    public String toString(String channelId) {
         StringBuilder message = new StringBuilder();
-        if (!categorylist.isEmpty()){
+        if (!categorylist.isEmpty()) {
             for (Category category : categorylist) {
-                if (category.channelidexists(channelId).get()){
+                if (category.channelidexists(channelId)) {
                     message.append(category.getcategoryname());
-                    message.append(System.getProperty("line.separator"));
-                }else{
+                    message.append(System.lineSeparator());
+                } else {
                     message.append("there are no categories set for this channel.");
                 }
             }
-        }else{
+        } else {
             message.append("there are no categories set for this channel.");
         }
         return message.toString();
