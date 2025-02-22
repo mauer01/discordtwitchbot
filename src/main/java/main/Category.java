@@ -1,6 +1,7 @@
 package main;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -8,6 +9,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 
 public class Category extends Thread {
     private final Map<String, Integer> Streamer = new ConcurrentHashMap<>();
@@ -30,13 +32,17 @@ public class Category extends Thread {
     }
 
     public void addChannel(String channelid) {
-        if (!channelidexists(channelid).get()) {
+        if (!channelidexists(channelid)) {
             ChannelIds.add(channelid);
             sendstreamer(channelid);
         }
     }
 
     public void sendstreamer(String channelid) {
+        TextChannel channel = bot.getTextChannelById(channelid);
+        if (channel == null) {
+            return;
+        }
         if (!Streamer.isEmpty()) {
             StringBuilder message = new StringBuilder("currently streaming: " + categoryname + ":");
             Streamer.forEach((streamer, i) -> {
@@ -70,7 +76,7 @@ public class Category extends Thread {
                 }
                 Streamer.replace(e, i + 1);
             });
-            keystoremove.forEach(Streamer::remove); 
+            keystoremove.forEach(Streamer::remove);
             currentstreamer = twitchapi.getstreamer(this.categoryname);
             if (currentstreamer.size() > 0) {
                 for (String participant : currentstreamer) {
@@ -80,8 +86,8 @@ public class Category extends Thread {
         }
     }
 
-    public String[] getChannelIds() {
-        return ChannelIds.toArray(new String[0]);
+    public List<String> getChannelIds() {
+        return new ArrayList<>(ChannelIds);
     }
 
     void addStreamer(String x) {
@@ -94,15 +100,16 @@ public class Category extends Thread {
     }
 
     void addStreamer(List<String> x) {
-        x.forEach((streamer) -> {
-            if (!this.Streamer.containsKey(streamer)) {
+        Iterator<String> iterator = x.iterator();
+        while (iterator.hasNext()) {
+            String streamer = iterator.next();
+            if (this.Streamer.containsKey(streamer)) {
                 this.Streamer.put(streamer, 0);
+                iterator.remove();
             } else {
                 this.Streamer.put(streamer, 0);
-                x.remove(streamer);
             }
-        });
-        this.newStreamer(x);
+        }
     }
 
     void newStreamer(String x) {
@@ -133,17 +140,13 @@ public class Category extends Thread {
         return this.categoryname;
     }
 
-    AtomicBoolean channelidexists(String channelid) {
-        AtomicBoolean bool = new AtomicBoolean(false);
-        if (ChannelIds.contains(channelid)) {
-            bool.set(true);
-        }
-        return bool;
-
+    boolean channelidexists(String channelid) {
+        return ChannelIds.contains(channelid);
     }
 
     void stopthread() {
         isstopped.set(true);
+        this.interrupt();
     }
 
 }
