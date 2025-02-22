@@ -1,8 +1,6 @@
 package main;
 
-
 import java.util.*;
-
 
 import org.json.JSONArray;
 
@@ -23,9 +21,11 @@ public class MyTwitch {
 
     public List<String> getstreamer(String categoryname) {
         List<String> streamerList = new ArrayList<>();
-
+        String categoryId = getcategoryid(categoryname);
+        if (categoryId == null) {
+            return streamerList;
+        }
         try {
-            int categoryId = getcategoryid(categoryname);
             for (int attempt = 0; attempt < 2; attempt++) {
                 HttpResponse<JsonNode> response = Unirest.get("https://api.twitch.tv/helix/streams")
                         .queryString("game_id", categoryId)
@@ -58,9 +58,8 @@ public class MyTwitch {
             e.printStackTrace();
         }
 
-        return streamerList; 
+        return streamerList;
     }
-
 
     private void getaccesstoken() {
         try {
@@ -71,15 +70,46 @@ public class MyTwitch {
                     .asJson();
             if (response.getStatus() == 200) {
                 this.accesstoken = response.getBody().getObject().getString("access_token");
+                if (this.accesstoken == null) {
+                    System.err.println("Access Token is missing in response!");
+                }
             } else {
                 System.err.println("Failed to get the access token. Status code: " + response.getStatus());
             }
         } catch (Exception e) {
+            System.err.println("Failed fetching access token.");
             e.printStackTrace();
         }
     }
-    private int getcategoryid(String categoryname){
-        //get request for the category id
+
+    private String getcategoryid(String categoryname) {
+        // get request for the category id
+        int maxattempts = 2;
+        for (int attempt = 0; attempt < maxattempts; attempt++) {
+            try {
+                HttpResponse<JsonNode> response = Unirest.get("https://api.twitch.tv/helix/games")
+                        .queryString("name", categoryname)
+                        .header("Client-ID", this.clientID)
+                        .header("Authorization", "Bearer " + this.accesstoken)
+                        .asJson();
+                if (response.getStatus() == 200) {
+
+                    String id = response.getBody().getObject().optJSONArray("data").getJSONObject(0).getString("id");
+
+                    return id;
+                } else {
+                    if (response.getStatus() == 401) {
+                        this.getaccesstoken();
+                        return getcategoryid(categoryname);
+                    } else {
+                        System.err.println("Failed to get the ID. Status code: " + response.getStatus());
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                return "-1";
+            }
+        }
         try {
             HttpResponse<JsonNode> response = Unirest.get("https://api.twitch.tv/helix/games")
                     .queryString("name", categoryname)
@@ -87,26 +117,24 @@ public class MyTwitch {
                     .header("Authorization", "Bearer " + this.accesstoken)
                     .asJson();
             if (response.getStatus() == 200) {
-                
-                int id = response.getBody().getObject().optJSONArray("data").getJSONObject(0).getInt("id");
-                
+
+                String id = response.getBody().getObject().optJSONArray("data").getJSONObject(0).getString("id");
+
                 return id;
             } else {
                 if (response.getStatus() == 401) {
                     this.getaccesstoken();
                     return getcategoryid(categoryname);
-                }
-                else {
+                } else {
                     System.err.println("Failed to get the ID. Status code: " + response.getStatus());
                 }
             }
         } catch (Exception e) {
             e.printStackTrace();
-            return -1;
+            return "-1";
         }
-        return -1;
+        return "-1";
 
     }
 
 }
-
