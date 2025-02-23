@@ -1,6 +1,8 @@
 package main.reactions;
 
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.Map;
 import main.Categories;
 import net.dv8tion.jda.api.Permission;
@@ -30,21 +32,25 @@ public class MessageReaction extends ListenerAdapter {
             return;
         if (!event.getMessage().getContentRaw().startsWith(commandidentifier))
             return;
-        String messagecontent = event.getMessage().getContentRaw();
+        String messageContent = event.getMessage().getContentRaw();
         if (cooldowns.containsKey(userId) && (currentTime - cooldowns.get(userId)) < 5000) {
             event.getChannel().sendMessage("Slow down! Wait a few seconds before using commands again.").queue();
             return;
         }
+        Pattern pattern = Pattern.compile("!([a-zA-Z]+)");
+        Matcher matcher = pattern.matcher(messageContent);
+
+        String command = matcher.group(1).toLowerCase();
         cooldowns.put(userId, currentTime); // Add user to cooldown list
         if (event.isFromGuild()) {
-            if (messagecontent.equals(commandidentifier + "ping")) {
+            if (command.equals("ping")) {
                 event.getChannel().sendMessage("Pong!").queue();
-            } else if (messagecontent.contains(commandidentifier + "getlist")) {
+            } else if (command.contains("getlist")) {
                 event.getChannel().sendMessage(currentcategories.toString(event.getChannel().getId())).queue();
-            } else if (messagecontent.contains(commandidentifier + "add") && messagecontent.length() > 5) {
+            } else if (command.contains("add") && messageContent.length() > 5) {
                 this.currentcategories.addCategory(event.getMessage().getContentRaw().substring(5),
                         event.getChannel().getId());
-            } else if (messagecontent.contains(commandidentifier + "remove") && messagecontent.length() > 8) {
+            } else if (command.contains("remove") && messageContent.length() > 8) {
                 this.currentcategories.removeCategory(event.getMessage().getContentRaw().substring(8),
                         event.getChannel().getId());
             }
