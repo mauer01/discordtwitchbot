@@ -12,6 +12,7 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 
 public class Category extends Thread {
+
     private final Map<String, Integer> Streamer = new ConcurrentHashMap<>();
     private final ConcurrentLinkedQueue<String> ChannelIds = new ConcurrentLinkedQueue<>();
     private final String categoryname;

@@ -1,6 +1,7 @@
 package main;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.json.JSONArray;
 
@@ -9,6 +10,7 @@ import com.mashape.unirest.http.JsonNode;
 import com.mashape.unirest.http.Unirest;
 
 public class MyTwitch {
+
     private final String clientID;
     private final String Client_Secret;
     private String accesstoken;

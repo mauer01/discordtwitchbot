@@ -15,8 +15,9 @@ import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 
 public class DiscordTwitchBot {
+
     public static void main(String[] args) {
-        
+
         Dotenv dotenv = Dotenv.load();
         final String token = dotenv.get("DISCORD_TOKEN");
         final String status = dotenv.get("DISCORD_STATUS");
@@ -43,7 +44,7 @@ public class DiscordTwitchBot {
             String currentcategory = "";
             for (String line : linesArray) {
                 String context = line.split(":")[0];
-                String value = line.split(":")[1]; 
+                String value = line.split(":")[1];
                 if (context.equals("category")) {
                     currentcategory = value;
                 } else if (context.equals("id")) {

@@ -1,15 +1,19 @@
 package main;
 
 import java.io.FileWriter;
-import java.util.*;
+import java.util.List;
 
-public class Shutdownhook extends Thread{;
+public class Shutdownhook extends Thread {
+
+    ;
     private List<Category> categorylist;
-    public Shutdownhook(List<Category> categorylist){
+
+    public Shutdownhook(List<Category> categorylist) {
         this.categorylist = categorylist;
-        
+
     }
-    public void run(){
+
+    public void run() {
         try {
             FileWriter categoriestext = new FileWriter("categories.txt");
             for (Category category : categorylist) {
@@ -19,11 +23,11 @@ public class Shutdownhook extends Thread{;
                 }
             }
 
-        categoriestext.close();
+            categoriestext.close();
         } catch (Exception e) {
             System.out.println(e);
         }
-        
+
     }
-    
+
 }

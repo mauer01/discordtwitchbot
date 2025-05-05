@@ -2,12 +2,14 @@ package main;
 
 import java.io.File;
 import java.io.FileWriter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 import main.exceptions.NotFound;
 import net.dv8tion.jda.api.JDA;
 
 public class Categories {
+
     private List<Category> categorylist = new ArrayList<>();
     private MyTwitch twitch;
     private JDA bot;
