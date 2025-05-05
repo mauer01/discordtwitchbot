@@ -4,10 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 
 import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.JsonNode;
 import com.mashape.unirest.http.Unirest;
+import com.mashape.unirest.http.exceptions.UnirestException;
 
 public class MyTwitch {
 
@@ -55,9 +57,8 @@ public class MyTwitch {
                     System.err.println("Antwort: " + response.getBody());
                 }
             }
-        } catch (Exception e) {
+        } catch (UnirestException | JSONException e) {
             System.err.println("Fehler in getstreamer für Kategorie: " + categoryname);
-            e.printStackTrace();
         }
 
         return streamerList;
@@ -78,9 +79,8 @@ public class MyTwitch {
             } else {
                 System.err.println("Failed to get the access token. Status code: " + response.getStatus());
             }
-        } catch (Exception e) {
+        } catch (UnirestException | JSONException e) {
             System.err.println("Failed fetching access token.");
-            e.printStackTrace();
         }
     }
 
@@ -107,8 +107,7 @@ public class MyTwitch {
                         System.err.println("Failed to get the ID. Status code: " + response.getStatus());
                     }
                 }
-            } catch (Exception e) {
-                e.printStackTrace();
+            } catch (UnirestException | JSONException e) {
                 return "-1";
             }
         }
@@ -131,8 +130,7 @@ public class MyTwitch {
                     System.err.println("Failed to get the ID. Status code: " + response.getStatus());
                 }
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (UnirestException | JSONException e) {
             return "-1";
         }
         return "-1";

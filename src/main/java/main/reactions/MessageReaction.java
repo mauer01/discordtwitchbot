@@ -7,6 +7,7 @@ import java.util.regex.Pattern;
 
 import main.Categories;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
@@ -24,15 +25,16 @@ public class MessageReaction extends ListenerAdapter {
     @Override
     public void onMessageReceived(MessageReceivedEvent event) {
         String userId = event.getAuthor().getId();
+        Member member = event.getMember();
         long currentTime = System.currentTimeMillis();
 
-        if (event.getMember() == null || !event.isFromGuild()) {
+        if (member == null || !event.isFromGuild()) {
             return;
         }
         if (event.getAuthor().isBot()) {
             return;
         }
-        if (!event.getMember().hasPermission(Permission.MANAGE_SERVER)) {
+        if (!member.hasPermission(Permission.MANAGE_SERVER)) {
             return;
         }
         if (!event.getMessage().getContentRaw().startsWith(commandidentifier)) {
