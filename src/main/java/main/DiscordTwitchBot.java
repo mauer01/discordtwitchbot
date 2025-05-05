@@ -1,5 +1,6 @@
 package main;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -51,8 +52,10 @@ public class DiscordTwitchBot {
                     currentcategories.addCategory(currentcategory, value);
                 }
             }
+        } catch (FileNotFoundException e) {
+            System.out.println("Categories.txt wurde noch nicht angelegt, App funktioniert trotzdem");
         } catch (IOException e) {
-            System.out.println(e);
+            System.out.println(e + System.lineSeparator() + "");
         }
     }
 }
