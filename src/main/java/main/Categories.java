@@ -1,6 +1,5 @@
 package main;
 
-import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -23,19 +22,17 @@ public class Categories {
 
     public void shutdownhook() {
         try {
-            try (FileWriter categoriestext = new FileWriter("categories.tmp")) {
+            try (FileWriter categoriestext = new FileWriter("categories.txt")) {
                 for (Category category : categorylist) {
-                    categoriestext.write(category.getcategoryname() + "\n");
+                    categoriestext.write("category:" + category.getcategoryname() + "\n");
                     for (String channelid : category.getChannelIds()) {
-                        categoriestext.write(channelid + "\n");
+                        categoriestext.write("id:" + channelid + "\n");
                     }
                 }
             }
         } catch (IOException e) {
             System.out.println(e);
-            return;
         }
-        new File("categories.tmp").renameTo(new File("categories.txt"));
     }
 
     public void setparams(MyTwitch x, JDA y) {
