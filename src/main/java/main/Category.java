@@ -1,11 +1,13 @@
 package main;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import net.dv8tion.jda.api.JDA;
@@ -19,13 +21,14 @@ public class Category extends Thread {
     private final MyTwitch twitchapi;
     private final AtomicBoolean isstopped = new AtomicBoolean(false);
     private final JDA bot;
+    private List<String> currentstreamer = null;
 
     public Category(String categoryname, MyTwitch API, JDA discordapi) {
 
         this.categoryname = categoryname;
         this.twitchapi = API;
         this.bot = discordapi;
-        this.start();
+
     }
 
     public boolean isstopped() {
@@ -49,9 +52,9 @@ public class Category extends Thread {
             Streamer.forEach((streamer, i) -> {
                 message.append("\nhttps://www.twitch.tv/").append(streamer);
             });
-            bot.getTextChannelById(channelid).sendMessage(message.toString()).queue();
+            channel.sendMessage(message.toString()).queue();
         } else if ((ChannelIds.size() > 1 && Streamer.isEmpty())) {
-            bot.getTextChannelById(channelid).sendMessage("Nobody is currently Streaming: " + categoryname).queue();
+            channel.sendMessage("Nobody is currently Streaming: " + categoryname).queue();
         }
     }
 
@@ -62,27 +65,26 @@ public class Category extends Thread {
         }
     }
 
+    @Override
     public void run() {
-        List<String> currentstreamer;
-        while (!isstopped()) {
-            try {
-                Thread.sleep(10000);
-            } catch (Exception e) {
-                System.err.println(e);
+        ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
+
+        executor.scheduleAtFixedRate(() -> task(), 0, 10, TimeUnit.SECONDS); // Initial verzögern und dann jede Sekunde ausführen
+    }
+
+    private void task() {
+        List<String> keystoremove = new ArrayList<>();
+        Streamer.forEach((e, i) -> {
+            if (Streamer.get(e) > 5) {
+                keystoremove.add(e);
             }
-            List<String> keystoremove = new ArrayList<>();
-            Streamer.forEach((e, i) -> {
-                if (Streamer.get(e) > 5) {
-                    keystoremove.add(e);
-                }
-                Streamer.replace(e, i + 1);
-            });
-            keystoremove.forEach(Streamer::remove);
-            currentstreamer = twitchapi.getstreamer(this.categoryname);
-            if (currentstreamer.size() > 0) {
-                for (String participant : currentstreamer) {
-                    addStreamer(participant);
-                }
+            Streamer.replace(e, i + 1);
+        });
+        keystoremove.forEach(Streamer::remove);
+        currentstreamer = twitchapi.getstreamer(this.categoryname);
+        if (!currentstreamer.isEmpty()) {
+            for (String participant : currentstreamer) {
+                addStreamer(participant);
             }
         }
     }
@@ -100,41 +102,15 @@ public class Category extends Thread {
         }
     }
 
-    void addStreamer(List<String> x) {
-        Iterator<String> iterator = x.iterator();
-        while (iterator.hasNext()) {
-            String streamer = iterator.next();
-            if (this.Streamer.containsKey(streamer)) {
-                this.Streamer.put(streamer, 0);
-                iterator.remove();
-            } else {
-                this.Streamer.put(streamer, 0);
-            }
-        }
-    }
-
     void newStreamer(String x) {
         StringBuilder message = new StringBuilder("New streamer is currently streaming " + categoryname + ":");
         message.append("\nhttps://www.twitch.tv/").append(x);
-        ChannelIds.forEach((channelid) -> bot.getTextChannelById(channelid).sendMessage(message.toString()).queue());
-    }
-
-    void newStreamer(List<String> x) {
-        StringBuilder message = new StringBuilder("Streamers are currently streaming " + categoryname + ":");
-        x.forEach((streamer) -> {
-            message.append("\nhttps://www.twitch.tv/").append(streamer);
+        ChannelIds.forEach((channelid) -> {
+            TextChannel channel = bot.getTextChannelById(channelid);
+            if (channel != null) {
+                channel.sendMessage(message.toString()).queue();
+            }
         });
-        ChannelIds.forEach((channelid) -> bot.getTextChannelById(channelid).sendMessage(message.toString()).queue());
-    }
-
-    void removeStreamer(String x) {
-        if (this.Streamer.containsKey(x)) {
-            this.Streamer.remove(x);
-        }
-    }
-
-    Map<String, Integer> getStreamer() {
-        return this.Streamer;
     }
 
     String getcategoryname() {
@@ -144,10 +120,4 @@ public class Category extends Thread {
     boolean channelidexists(String channelid) {
         return ChannelIds.contains(channelid);
     }
-
-    void stopthread() {
-        isstopped.set(true);
-        this.interrupt();
-    }
-
 }

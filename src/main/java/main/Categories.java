@@ -2,6 +2,7 @@ package main;
 
 import java.io.File;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,7 +11,7 @@ import net.dv8tion.jda.api.JDA;
 
 public class Categories {
 
-    private List<Category> categorylist = new ArrayList<>();
+    private final List<Category> categorylist = new ArrayList<>();
     private MyTwitch twitch;
     private JDA bot;
 
@@ -22,16 +23,15 @@ public class Categories {
 
     public void shutdownhook() {
         try {
-            FileWriter categoriestext = new FileWriter("categories.tmp");
-            for (Category category : categorylist) {
-                categoriestext.write(category.getcategoryname() + "\n");
-                for (String channelid : category.getChannelIds()) {
-                    categoriestext.write(channelid + "\n");
+            try (FileWriter categoriestext = new FileWriter("categories.tmp")) {
+                for (Category category : categorylist) {
+                    categoriestext.write(category.getcategoryname() + "\n");
+                    for (String channelid : category.getChannelIds()) {
+                        categoriestext.write(channelid + "\n");
+                    }
                 }
             }
-
-            categoriestext.close();
-        } catch (Exception e) {
+        } catch (IOException e) {
             System.out.println(e);
             return;
         }
@@ -51,6 +51,7 @@ public class Categories {
             Category temp = new Category(x, twitch, bot);
             temp.addChannel(channelid);
             this.categorylist.add(temp);
+            temp.start();
         }
     }
 
@@ -81,6 +82,7 @@ public class Categories {
         throw new NotFound("category not in list");
     }
 
+    @Override
     public String toString() {
         StringBuilder message = new StringBuilder();
         if (!categorylist.isEmpty()) {
