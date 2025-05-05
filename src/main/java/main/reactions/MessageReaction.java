@@ -48,19 +48,21 @@ public class MessageReaction extends ListenerAdapter {
         Pattern pattern = Pattern.compile("!([a-zA-Z]+)");
         Matcher matcher = pattern.matcher(messageContent);
 
-        String command = matcher.group(1).toLowerCase();
-        cooldowns.put(userId, currentTime); // Add user to cooldown list
-        if (event.isFromGuild()) {
-            if (command.equals("ping")) {
-                event.getChannel().sendMessage("Pong!").queue();
-            } else if (command.contains("getlist")) {
-                event.getChannel().sendMessage(currentcategories.toString(event.getChannel().getId())).queue();
-            } else if (command.contains("add") && messageContent.length() > 5) {
-                this.currentcategories.addCategory(event.getMessage().getContentRaw().substring(5),
-                        event.getChannel().getId());
-            } else if (command.contains("remove") && messageContent.length() > 8) {
-                this.currentcategories.removeCategory(event.getMessage().getContentRaw().substring(8),
-                        event.getChannel().getId());
+        if (matcher.find()) {
+            String command = matcher.group(1).toLowerCase();
+            cooldowns.put(userId, currentTime); // Add user to cooldown list
+            if (event.isFromGuild()) {
+                if (command.equals("ping")) {
+                    event.getChannel().sendMessage("Pong!").queue();
+                } else if (command.contains("getlist")) {
+                    event.getChannel().sendMessage(currentcategories.toString(event.getChannel().getId())).queue();
+                } else if (command.contains("add") && messageContent.length() > 5) {
+                    this.currentcategories.addCategory(event.getMessage().getContentRaw().substring(5),
+                            event.getChannel().getId());
+                } else if (command.contains("remove") && messageContent.length() > 8) {
+                    this.currentcategories.removeCategory(event.getMessage().getContentRaw().substring(8),
+                            event.getChannel().getId());
+                }
             }
         }
     }
