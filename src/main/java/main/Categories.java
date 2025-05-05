@@ -98,17 +98,14 @@ public class Categories {
 
     public String toString(String channelId) {
         StringBuilder message = new StringBuilder();
-        if (!categorylist.isEmpty()) {
-            for (Category category : categorylist) {
-                if (category.channelidexists(channelId)) {
-                    message.append(category.getcategoryname());
-                    message.append(System.lineSeparator());
-                } else {
-                    message.append("there are no categories set for this channel.");
-                }
+        for (Category category : categorylist) {
+            if (category.channelidexists(channelId)) {
+                message.append(category.getcategoryname());
+                message.append(System.lineSeparator());
             }
-        } else {
-            message.append("there are no categories set for this channel.");
+        }
+        if (message.toString().equals("")) {
+            message.append("There are no categories set for this channel!");
         }
         return message.toString();
     }
