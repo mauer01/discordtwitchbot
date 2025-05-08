@@ -1,21 +1,29 @@
 package main;
 
+import java.util.Set;
+
 import redis.clients.jedis.Jedis;
 
 public class Redis {
 
-    public static void main(String[] args) {
+    private final Jedis redis;
+    private final String category;
 
-        Jedis jedis = new Jedis();
-        jedis.setex("hallo", 5, "welt");
-        String hallo = jedis.get("hallo");
-        System.out.print(hallo);
-        try {
-            Thread.sleep(6000);
-        } catch (Exception e) {
-            System.err.println(e);
-        }
-        hallo = jedis.get("hallo");
-        System.out.print(hallo);
+    public Redis(String category) {
+        this.category = "discordtwitch:" + category + ":";
+        this.redis = new Jedis();
     }
+
+    public String get(String key) {
+        return redis.get(this.category + key);
+    }
+
+    public void add(String streamer, int i) {
+        redis.setex(this.category + streamer, i, "exists");
+    }
+
+    public Set<String> getremaining() {
+        return redis.keys(category + "*");
+    }
+
 }
