@@ -42,7 +42,7 @@ public class Category extends Thread {
 
     private List<String> getoldstreamer() throws NotFound {
         Set<String> getremaining = redis.getremaining();
-        if ((ChannelIds.size() > 1 && getremaining.isEmpty())) {
+        if (getremaining.isEmpty()) {
             throw new NotFound("no stuff");
         }
         return getremaining.stream()
@@ -51,9 +51,8 @@ public class Category extends Thread {
 
     public void sendstreamer(String channelid) {
         TextChannel channel = bot.getTextChannelById(channelid);
-        if (channel == null) {
+        if (channel == null || ChannelIds.size() < 1)
             return;
-        }
         try {
             List<String> currentstreamer = getoldstreamer();
             StringBuilder message = new StringBuilder("currently streaming: " + categoryname + ":");
@@ -61,7 +60,7 @@ public class Category extends Thread {
                 message.append("\nhttps://www.twitch.tv/").append(streamer);
             }
             channel.sendMessage(message.toString()).queue();
-        } catch (NotFound e) {
+        } catch (NotFound _e) {
             channel.sendMessage("Nobody is currently Streaming: " + categoryname).queue();
         }
 
@@ -92,7 +91,7 @@ public class Category extends Thread {
                     addStreamer(current, false);
                 }
             }
-        } catch (NotFound e) {
+        } catch (NotFound _e) {
             if (!currentstreamer.isEmpty()) {
                 for (String participant : currentstreamer) {
                     addStreamer(participant, true);
