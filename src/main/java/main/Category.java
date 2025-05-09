@@ -4,33 +4,29 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.ScheduledFuture;
 
 import main.exceptions.NotFound;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 
-public class Category extends Thread {
+public class Category {
     private final ConcurrentLinkedQueue<String> ChannelIds = new ConcurrentLinkedQueue<>();
     private final String categoryname;
     private final MyTwitch twitchapi;
-    private final AtomicBoolean isstopped = new AtomicBoolean(false);
     private final JDA bot;
     private final Redis redis;
+    private ScheduledFuture<?> future;
 
     public Category(String categoryname, MyTwitch API, JDA discordapi) {
         this.redis = new Redis(categoryname);
         this.categoryname = categoryname;
         this.twitchapi = API;
         this.bot = discordapi;
-
     }
 
-    public boolean isstopped() {
-        return this.isstopped.get();
+    public void addFuture(ScheduledFuture<?> future) {
+        this.future = future;
     }
 
     public void addChannel(String channelid) {
@@ -66,21 +62,15 @@ public class Category extends Thread {
 
     }
 
-    public void removeChannel(String channelid) {
-        boolean removed = ChannelIds.remove(channelid);
-        if (removed && ChannelIds.isEmpty()) {
-            isstopped.set(true);
+    public void removeChannel(String channelid) throws NotFound {
+        ChannelIds.remove(channelid);
+        if (ChannelIds.isEmpty()) {
+            future.cancel(false);
+            throw new NotFound("closing");
         }
     }
 
-    @Override
-    public void run() {
-        ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
-
-        executor.scheduleAtFixedRate(() -> task(), 0, 10, TimeUnit.SECONDS);
-    }
-
-    private void task() {
+    public void task() {
         List<String> currentstreamer = twitchapi.getstreamer(this.categoryname);
         try {
             List<String> oldstreamer = getoldstreamer();

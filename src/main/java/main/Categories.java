@@ -4,6 +4,9 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import main.exceptions.NotFound;
 import net.dv8tion.jda.api.JDA;
@@ -13,11 +16,13 @@ public class Categories {
     private final List<Category> categorylist = new ArrayList<>();
     private MyTwitch twitch;
     private JDA bot;
+    ScheduledThreadPoolExecutor executor;
 
     public Categories() {
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             shutdownhook();
         }, "Shutdown-thread"));
+        executor = new ScheduledThreadPoolExecutor(1);
     }
 
     public void shutdownhook() {
@@ -45,10 +50,12 @@ public class Categories {
             Category y = getcategorybyname(x);
             y.addChannel(channelid);
         } catch (NotFound e) {
+            executor.setCorePoolSize(executor.getCorePoolSize() + 1);
             Category temp = new Category(x, twitch, bot);
             temp.addChannel(channelid);
             this.categorylist.add(temp);
-            temp.start();
+            ScheduledFuture<?> taskHandle = executor.scheduleAtFixedRate(() -> temp.task(), 0, 10, TimeUnit.SECONDS);
+            temp.addFuture(taskHandle);
         }
     }
 
@@ -60,9 +67,9 @@ public class Categories {
         Category x;
         try {
             x = getcategorybyname(name);
-            x.removeChannel(channel);
-
-            if (x.isstopped()) {
+            try {
+                x.removeChannel(channel);
+            } catch (NotFound e) {
                 categorylist.remove(x);
             }
         } catch (NotFound e) {
