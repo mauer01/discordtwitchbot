@@ -1,0 +1,626 @@
+@startuml Method Flow Diagrams - DiscordTwitchBot
+
+!theme plain
+skinparam activityFontStyle bold
+skinparam activityBorderColor black
+skinparam activityBackgroundColor lightyellow
+
+'==============================================================================
+' 1. DiscordTwitchBot.main() Method Flow
+'==============================================================================
+start
+title **DiscordTwitchBot.main() Flow**
+
+:Load environment variables using Dotenv;
+:Extract Discord token, status, Twitch client ID and secret;
+:Create Categories instance;
+:Create JDABuilder with Discord token;
+:Set bot status to ONLINE;
+:Set bot activity to playing status;
+:Add MessageReaction event listener;
+:Enable MESSAGE_CONTENT intent;
+:Build JDA bot instance;
+:Create MyTwitch instance;
+:Wait for bot to be ready;
+:Set Categories parameters (twitch, bot);
+
+if (Categories.txt file exists?) then (yes)
+    :Read all lines from categories.txt;
+    :Convert lines to array;
+    :Initialize currentcategory variable;
+    
+    while (For each line in file) is (more lines)
+        :Split line by colon to get context and value;
+        if (Context is "category"?) then (yes)
+            :Set currentcategory = value;
+        elseif (Context is "id"?) then (yes)
+            :Add category with currentcategory and channel ID;
+        endif
+    endwhile (no more lines)
+else (no)
+    :Print info message about missing file;
+endif
+
+stop
+
+'==============================================================================
+' 2. Categories.shutdownhook() Method Flow
+'==============================================================================
+start
+title **Categories.shutdownhook() Flow**
+
+:Create FileWriter for categories.txt;
+
+while (For each category in categorylist) is (more categories)
+    :Write "category:" + categoryname to file;
+    
+    while (For each channel ID in category) is (more channels)
+        :Write "id:" + channelid to file;
+    endwhile (no more channels)
+endwhile (no more categories)
+
+:Close FileWriter;
+
+if (IOException occurs?) then (yes)
+    :Print exception to console;
+endif
+
+stop
+
+'==============================================================================
+' 3. Categories.setparams() Method Flow
+'==============================================================================
+start
+title **Categories.setparams() Flow**
+
+:Set twitch = x parameter;
+:Set bot = y parameter;
+
+stop
+
+'==============================================================================
+' 4. Categories.addCategory() Method Flow
+'==============================================================================
+start
+title **Categories.addCategory() Flow**
+
+:Try to get category by name;
+
+if (Category exists?) then (yes)
+    :Add channel to existing category;
+else (NotFound exception)
+    :Create new Category instance;
+    :Add channel to new category;
+    :Add category to categorylist;
+    :Start category thread;
+endif
+
+stop
+
+'==============================================================================
+' 5. Categories.getCategories() Method Flow
+'==============================================================================
+start
+title **Categories.getCategories() Flow**
+
+:Return categorylist;
+
+stop
+
+'==============================================================================
+' 6. Categories.removeCategory() Method Flow
+'==============================================================================
+start
+title **Categories.removeCategory() Flow**
+
+:Try to get category by name;
+
+if (Category exists?) then (yes)
+    :Remove channel from category;
+    
+    if (Category is stopped?) then (yes)
+        :Remove category from categorylist;
+    endif
+else (NotFound exception)
+    :Print error message with category name;
+endif
+
+stop
+
+'==============================================================================
+' 7. Categories.getcategorybyname() Method Flow
+'==============================================================================
+start
+title **Categories.getcategorybyname() Flow**
+
+while (For each category in categorylist) is (more categories)
+    if (Category name matches?) then (yes)
+        :Return category;
+        stop
+    endif
+endwhile (no more categories)
+
+:Throw NotFound exception;
+
+stop
+
+'==============================================================================
+' 8. Categories.toString() Method Flow
+'==============================================================================
+start
+title **Categories.toString() Flow**
+
+:Initialize StringBuilder;
+
+if (Categorylist is empty?) then (yes)
+    :Append "there are no categories set yet.";
+else (no)
+    while (For each category in categorylist) is (more categories)
+        :Append category name;
+        :Append line separator;
+    endwhile (no more categories)
+endif
+
+:Return message string;
+
+stop
+
+'==============================================================================
+' 9. Categories.toString(String channelId) Method Flow
+'==============================================================================
+start
+title **Categories.toString(channelId) Flow**
+
+:Initialize StringBuilder;
+
+while (For each category in categorylist) is (more categories)
+    if (Category contains channelId?) then (yes)
+        :Append category name;
+        :Append line separator;
+    endif
+endwhile (no more categories)
+
+if (Message is empty?) then (yes)
+    :Append "There are no categories set for this channel!";
+endif
+
+:Return message string;
+
+stop
+
+'==============================================================================
+' 10. Category.isstopped() Method Flow
+'==============================================================================
+start
+title **Category.isstopped() Flow**
+
+:Return isstopped.get() value;
+
+stop
+
+'==============================================================================
+' 11. Category.addChannel() Method Flow
+'==============================================================================
+start
+title **Category.addChannel() Flow**
+
+if (Channel ID doesn't exist?) then (yes)
+    :Add channelid to ChannelIds queue;
+    :Call sendstreamer(channelid);
+endif
+
+stop
+
+'==============================================================================
+' 12. Category.sendstreamer() Method Flow
+'==============================================================================
+start
+title **Category.sendstreamer() Flow**
+
+:Get TextChannel by channelid;
+
+if (Channel is null?) then (yes)
+    :Return without action;
+    stop
+endif
+
+if (Streamer map is not empty?) then (yes)
+    :Initialize message with category name;
+    
+    while (For each streamer in map) is (more streamers)
+        :Append Twitch URL for streamer;
+    endwhile (no more streamers)
+    
+    :Send message to channel;
+elseif (Multiple channels and no streamers?) then (yes)
+    :Send "Nobody is currently Streaming" message;
+endif
+
+stop
+
+'==============================================================================
+' 13. Category.removeChannel() Method Flow
+'==============================================================================
+start
+title **Category.removeChannel() Flow**
+
+:Remove channelid from ChannelIds;
+
+if (Removal successful AND ChannelIds is empty?) then (yes)
+    :Set isstopped to true;
+endif
+
+stop
+
+'==============================================================================
+' 14. Category.run() Method Flow
+'==============================================================================
+start
+title **Category.run() Flow**
+
+:Create ScheduledExecutorService with single thread;
+:Schedule task() to run every 10 seconds;
+
+note right
+    The task continues running 
+    until the thread is stopped
+end note
+
+stop
+
+'==============================================================================
+' 15. Category.task() Method Flow
+'==============================================================================
+start
+title **Category.task() Flow**
+
+:Initialize keystoremove list;
+
+while (For each streamer in Streamer map) is (more streamers)
+    if (Streamer count > 5?) then (yes)
+        :Add streamer to keystoremove list;
+    endif
+    :Increment streamer count by 1;
+endwhile (no more streamers)
+
+:Remove all streamers in keystoremove list;
+:Get current streamers from Twitch API;
+
+if (Current streamers list not empty?) then (yes)
+    while (For each participant) is (more participants)
+        :Call addStreamer(participant);
+    endwhile (no more participants)
+endif
+
+stop
+
+'==============================================================================
+' 16. Category.getChannelIds() Method Flow
+'==============================================================================
+start
+title **Category.getChannelIds() Flow**
+
+:Create new ArrayList from ChannelIds queue;
+:Return the ArrayList;
+
+stop
+
+'==============================================================================
+' 17. Category.addStreamer() Method Flow
+'==============================================================================
+start
+title **Category.addStreamer() Flow**
+
+if (Streamer not in map?) then (yes)
+    :Add streamer to map with count 0;
+    :Call newStreamer(x);
+else (no)
+    :Update streamer count to 0;
+endif
+
+stop
+
+'==============================================================================
+' 18. Category.newStreamer() Method Flow
+'==============================================================================
+start
+title **Category.newStreamer() Flow**
+
+:Initialize message with category name and streamer;
+:Append Twitch URL for streamer;
+
+while (For each channelid in ChannelIds) is (more channels)
+    :Get TextChannel by channelid;
+    
+    if (Channel is not null?) then (yes)
+        :Send message to channel;
+    endif
+endwhile (no more channels)
+
+stop
+
+'==============================================================================
+' 19. Category.getcategoryname() Method Flow
+'==============================================================================
+start
+title **Category.getcategoryname() Flow**
+
+:Return categoryname;
+
+stop
+
+'==============================================================================
+' 20. Category.channelidexists() Method Flow
+'==============================================================================
+start
+title **Category.channelidexists() Flow**
+
+:Check if ChannelIds contains channelid;
+:Return boolean result;
+
+stop
+
+'==============================================================================
+' 21. MyTwitch.getstreamer() Method Flow
+'==============================================================================
+start
+title **MyTwitch.getstreamer() Flow**
+
+:Initialize empty streamerList;
+:Get categoryId for categoryname;
+
+if (CategoryId is null?) then (yes)
+    :Return empty streamerList;
+    stop
+endif
+
+:Set attempt counter to 0;
+
+while (Attempt < 2) is (more attempts)
+    :Make Twitch API request for streams;
+    
+    if (Response status is 200?) then (yes)
+        :Extract data array from response;
+        
+        if (Data array is not null?) then (yes)
+            while (For each stream in data) is (more streams)
+                :Extract user_name;
+                :Add to streamerList;
+            endwhile (no more streams)
+        else (no)
+            :Print "No streamers found" message;
+        endif
+        
+        :Return streamerList;
+        stop
+    elseif (Status is 401 and first attempt?) then (yes)
+        :Print "Token invalid" message;
+        :Get new access token;
+    else (no)
+        :Print error message with status code;
+    endif
+    
+    :Increment attempt counter;
+endwhile (max attempts reached)
+
+:Return empty streamerList;
+
+stop
+
+'==============================================================================
+' 22. MyTwitch.getaccesstoken() Method Flow
+'==============================================================================
+start
+title **MyTwitch.getaccesstoken() Flow**
+
+:Make POST request to Twitch OAuth endpoint;
+:Send client_id, client_secret, grant_type;
+
+if (Response status is 200?) then (yes)
+    :Extract access_token from response;
+    
+    if (Access token is null?) then (yes)
+        :Print "Access Token is missing" error;
+    endif
+else (no)
+    :Print "Failed to get access token" with status code;
+endif
+
+note right
+    Exception handling for 
+    UnirestException and JSONException
+end note
+
+stop
+
+'==============================================================================
+' 23. MyTwitch.getcategoryid() Method Flow
+'==============================================================================
+start
+title **MyTwitch.getcategoryid() Flow**
+
+:Set maxattempts to 2;
+
+while (Attempt < maxattempts) is (more attempts)
+    :Make GET request to Twitch games API;
+    :Send categoryname as query parameter;
+    
+    if (Response status is 200?) then (yes)
+        :Extract game ID from response data array;
+        :Return ID;
+        stop
+    elseif (Status is 401?) then (yes)
+        :Get new access token;
+        :Recursively call getcategoryid;
+    else (no)
+        :Print "Failed to get ID" with status code;
+    endif
+endwhile (max attempts reached)
+
+:Make final attempt with same API call;
+
+if (Response status is 200?) then (yes)
+    :Extract and return game ID;
+elseif (Status is 401?) then (yes)
+    :Get new access token;
+    :Recursively call getcategoryid;
+else (no)
+    :Print error message;
+endif
+
+:Return "-1" as failure indicator;
+
+stop
+
+'==============================================================================
+' 24. MessageReaction.onMessageReceived() Method Flow
+'==============================================================================
+start
+title **MessageReaction.onMessageReceived() Flow**
+
+:Get user ID from event;
+:Get member from event;
+:Get current time;
+
+if (Member is null OR not from guild?) then (yes)
+    :Return without action;
+    stop
+endif
+
+if (Author is bot?) then (yes)
+    :Return without action;
+    stop
+endif
+
+if (Member doesn't have MANAGE_SERVER permission?) then (yes)
+    :Return without action;
+    stop
+endif
+
+if (Message doesn't start with command identifier?) then (yes)
+    :Return without action;
+    stop
+endif
+
+:Get message content;
+
+if (User in cooldown AND less than 5 seconds passed?) then (yes)
+    :Send "Slow down!" message;
+    :Return without action;
+    stop
+endif
+
+:Create pattern for command extraction;
+:Match pattern against message content;
+
+if (Pattern matches?) then (yes)
+    :Extract command and convert to lowercase;
+    :Add user to cooldown list;
+    
+    if (Event is from guild?) then (yes)
+        if (Command is "ping"?) then (yes)
+            :Send "Pong!" message;
+        elseif (Command contains "getlist"?) then (yes)
+            :Send categories list for channel;
+        elseif (Command contains "add" AND message length > 5?) then (yes)
+            :Add category with substring from position 5;
+        elseif (Command contains "remove" AND message length > 8?) then (yes)
+            :Remove category with substring from position 8;
+        endif
+    endif
+endif
+
+stop
+
+'==============================================================================
+' 25. NotFound Constructor Flow
+'==============================================================================
+start
+title **NotFound() Constructor Flow**
+
+:Call super(errorMessage);
+:Initialize exception with error message;
+
+stop
+
+'==============================================================================
+' 26. myTest.main() Method Flow
+'==============================================================================
+start
+title **myTest.main() Flow**
+
+:Initialize oldstreamer array with values;
+:Initialize newstreamer array with values;
+:Call filternewstreamer(oldstreamer, newstreamer);
+
+while (For each string in result) is (more strings)
+    :Print string to console;
+endwhile (no more strings)
+
+:Set oldstreamer = newstreamer;
+:Initialize new newstreamer array;
+:Call filternewstreamer again;
+
+if (Result array length is 0?) then (yes)
+    :Print "no new streamer";
+else (no)
+    while (For each string in result) is (more strings)
+        :Print ":" + string to console;
+    endwhile (no more strings)
+endif
+
+stop
+
+'==============================================================================
+' 27. myTest.compareArrays() Method Flow
+'==============================================================================
+start
+title **myTest.compareArrays() Flow**
+
+if (Array lengths are different?) then (yes)
+    :Return false;
+    stop
+endif
+
+:Sort array1;
+:Sort array2;
+:Return Arrays.equals(array1, array2);
+
+stop
+
+'==============================================================================
+' 28. myTest.filternewstreamer() Method Flow
+'==============================================================================
+start
+title **myTest.filternewstreamer() Flow**
+
+:Calculate total size y = oldstreamer.length + newstreamer.length;
+:Initialize array x with size y;
+
+while (For each element in newstreamer) is (more elements)
+    if (Element not in oldstreamer?) then (yes)
+        :Add element to array x at position i;
+    endif
+endwhile (no more elements)
+
+:Reset y to 0;
+:Initialize index array z;
+
+while (For each element in x) is (more elements)
+    if (Element is not null?) then (yes)
+        :Store index in array z;
+        :Increment y;
+    endif
+endwhile (no more elements)
+
+:Initialize result array q with size y;
+
+while (i < y) is (more elements)
+    :Copy element from x to q using stored indices;
+endwhile (no more elements)
+
+:Return array q;
+
+stop
+
+@enduml

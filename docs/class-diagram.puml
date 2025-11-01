@@ -1,0 +1,140 @@
+@startuml DiscordTwitchBot Class Diagram
+
+!theme plain
+skinparam classAttributeIconSize 0
+skinparam classFontStyle bold
+
+package "main" {
+    class DiscordTwitchBot {
+        +{static} main(String[] args) : void
+    }
+    
+    class Categories {
+        -categorylist : List<Category>
+        -twitch : MyTwitch
+        -bot : JDA
+        
+        +Categories()
+        +shutdownhook() : void
+        +setparams(MyTwitch x, JDA y) : void
+        +addCategory(String x, String channelid) : void
+        +getCategories() : List<Category>
+        +removeCategory(String name, String channel) : void
+        +getcategorybyname(String x) : Category
+        +toString() : String
+        +toString(String channelId) : String
+    }
+    
+    class Category {
+        -Streamer : Map<String, Integer>
+        -ChannelIds : ConcurrentLinkedQueue<String>
+        -categoryname : String
+        -twitchapi : MyTwitch
+        -isstopped : AtomicBoolean
+        -bot : JDA
+        -currentstreamer : List<String>
+        
+        +Category(String categoryname, MyTwitch API, JDA discordapi)
+        +isstopped() : boolean
+        +addChannel(String channelid) : void
+        +sendstreamer(String channelid) : void
+        +removeChannel(String channelid) : void
+        +run() : void
+        -task() : void
+        +getChannelIds() : List<String>
+        -addStreamer(String x) : void
+        -newStreamer(String x) : void
+        -getcategoryname() : String
+        -channelidexists(String channelid) : boolean
+    }
+    
+    class MyTwitch {
+        -clientID : String
+        -Client_Secret : String
+        -accesstoken : String
+        
+        +MyTwitch(String clientID, String Client_Secret)
+        +getstreamer(String categoryname) : List<String>
+        -getaccesstoken() : void
+        -getcategoryid(String categoryname) : String
+    }
+}
+
+package "main.reactions" {
+    class MessageReaction {
+        -currentcategories : Categories
+        -commandidentifier : String
+        -cooldowns : Map<String, Long>
+        
+        +MessageReaction(Categories current)
+        +onMessageReceived(MessageReceivedEvent event) : void
+    }
+}
+
+package "main.exceptions" {
+    class NotFound {
+        +NotFound(String errorMessage)
+    }
+}
+
+' External dependencies (shown as interfaces/classes)
+interface JDA <<external>>
+interface ListenerAdapter <<external>>
+class Thread <<external>>
+class Exception <<external>>
+
+' Relationships
+DiscordTwitchBot --> Categories : creates
+DiscordTwitchBot --> MyTwitch : creates
+DiscordTwitchBot --> MessageReaction : creates
+DiscordTwitchBot --> JDA : uses
+
+Categories --> Category : manages *
+Categories --> MyTwitch : uses
+Categories --> JDA : uses
+Categories --> NotFound : throws
+
+Category --|> Thread : extends
+Category --> MyTwitch : uses
+Category --> JDA : uses
+
+MessageReaction --|> ListenerAdapter : extends
+MessageReaction --> Categories : uses
+
+NotFound --|> Exception : extends
+
+' Composition relationships
+Categories *-- Category : contains
+MessageReaction o-- Categories : aggregates
+
+note top of DiscordTwitchBot
+  Main entry point of the application.
+  Initializes Discord bot, Twitch API,
+  and loads categories from file.
+end note
+
+note right of Categories
+  Manages a collection of Category objects
+  and handles persistence to categories.txt.
+  Implements shutdown hook for data saving.
+end note
+
+note right of Category
+  Extends Thread to monitor Twitch streams
+  for a specific game category. Sends Discord
+  notifications when streamers go live.
+end note
+
+note bottom of MyTwitch
+  Handles Twitch API interactions including
+  OAuth token management and stream data
+  retrieval for game categories.
+end note
+
+note left of MessageReaction
+  Discord event listener that processes
+  bot commands with cooldown management
+  and permission checking.
+end note
+
+@enduml
