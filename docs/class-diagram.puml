@@ -6,68 +6,68 @@ skinparam classFontStyle bold
 
 package "main" {
     class DiscordTwitchBot {
-        +{static} main(String[] args) : void
+        +{static} main(String[] args): void
     }
     
     class Categories {
-        -categorylist : List<Category>
-        -twitch : MyTwitch
-        -bot : JDA
+        -categorylist: List<Category>
+        -twitch: MyTwitch
+        -bot: JDA
         
         +Categories()
-        +shutdownhook() : void
-        +setparams(MyTwitch x, JDA y) : void
-        +addCategory(String x, String channelid) : void
-        +getCategories() : List<Category>
-        +removeCategory(String name, String channel) : void
-        +getcategorybyname(String x) : Category
-        +toString() : String
-        +toString(String channelId) : String
+        +shutdownhook(): void
+        +setparams(MyTwitch x, JDA y): void
+        +addCategory(String x, String channelid): void
+        +getCategories(): List<Category>
+        +removeCategory(String name, String channel): void
+        +getcategorybyname(String x): Category
+        +toString(): String
+        +toString(String channelId): String
     }
     
     class Category {
-        -Streamer : Map<String, Integer>
-        -ChannelIds : ConcurrentLinkedQueue<String>
-        -categoryname : String
-        -twitchapi : MyTwitch
-        -isstopped : AtomicBoolean
-        -bot : JDA
-        -currentstreamer : List<String>
+        -Streamer: Map<String, Integer>
+        -ChannelIds: ConcurrentLinkedQueue<String>
+        -categoryname: String
+        -twitchapi: MyTwitch
+        -isstopped: AtomicBoolean
+        -bot: JDA
+        -currentstreamer: List<String>
         
         +Category(String categoryname, MyTwitch API, JDA discordapi)
-        +isstopped() : boolean
-        +addChannel(String channelid) : void
-        +sendstreamer(String channelid) : void
-        +removeChannel(String channelid) : void
-        +run() : void
-        -task() : void
-        +getChannelIds() : List<String>
-        -addStreamer(String x) : void
-        -newStreamer(String x) : void
-        -getcategoryname() : String
-        -channelidexists(String channelid) : boolean
+        +isstopped(): boolean
+        +addChannel(String channelid): void
+        +sendstreamer(String channelid): void
+        +removeChannel(String channelid): void
+        +run(): void
+        -task(): void
+        +getChannelIds(): List<String>
+        -addStreamer(String x): void
+        -newStreamer(String x): void
+        -getcategoryname(): String
+        -channelidexists(String channelid): boolean
     }
     
     class MyTwitch {
-        -clientID : String
-        -Client_Secret : String
-        -accesstoken : String
+        -clientID: String
+        -Client_Secret: String
+        -accesstoken: String
         
         +MyTwitch(String clientID, String Client_Secret)
-        +getstreamer(String categoryname) : List<String>
-        -getaccesstoken() : void
-        -getcategoryid(String categoryname) : String
+        +getstreamer(String categoryname): List<String>
+        -getaccesstoken(): void
+        -getcategoryid(String categoryname): String
     }
 }
 
 package "main.reactions" {
     class MessageReaction {
-        -currentcategories : Categories
-        -commandidentifier : String
-        -cooldowns : Map<String, Long>
+        -currentcategories: Categories
+        -commandidentifier: String
+        -cooldowns: Map<String, Long>
         
         +MessageReaction(Categories current)
-        +onMessageReceived(MessageReceivedEvent event) : void
+        +onMessageReceived(MessageReceivedEvent event): void
     }
 }
 
@@ -84,28 +84,28 @@ class Thread <<external>>
 class Exception <<external>>
 
 ' Relationships
-DiscordTwitchBot --> Categories : creates
-DiscordTwitchBot --> MyTwitch : creates
-DiscordTwitchBot --> MessageReaction : creates
-DiscordTwitchBot --> JDA : uses
+DiscordTwitchBot --> Categories: creates
+DiscordTwitchBot --> MyTwitch: creates
+DiscordTwitchBot --> MessageReaction: creates
+DiscordTwitchBot --> JDA: uses
 
-Categories --> Category : manages *
-Categories --> MyTwitch : uses
-Categories --> JDA : uses
-Categories --> NotFound : throws
+Categories --> Category: manages *
+Categories --> MyTwitch: uses
+Categories --> JDA: uses
+Categories --> NotFound: throws
 
-Category --|> Thread : extends
-Category --> MyTwitch : uses
-Category --> JDA : uses
+Category --|> Thread: extends
+Category --> MyTwitch: uses
+Category --> JDA: uses
 
-MessageReaction --|> ListenerAdapter : extends
-MessageReaction --> Categories : uses
+MessageReaction --|> ListenerAdapter: extends
+MessageReaction --> Categories: uses
 
-NotFound --|> Exception : extends
+NotFound --|> Exception: extends
 
 ' Composition relationships
-Categories *-- Category : contains
-MessageReaction o-- Categories : aggregates
+Categories *-- Category: contains
+MessageReaction o-- Categories: aggregates
 
 note top of DiscordTwitchBot
   Main entry point of the application.
