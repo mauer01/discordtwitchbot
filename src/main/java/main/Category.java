@@ -69,13 +69,13 @@ public class Category extends Thread {
     public void run() {
         ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
 
-        executor.scheduleAtFixedRate(() -> task(), 0, 10, TimeUnit.SECONDS); // Initial verzögern und dann jede Sekunde ausführen
+        executor.scheduleAtFixedRate(() -> task(), 0, 10, TimeUnit.SECONDS);
     }
 
     private void task() {
         List<String> keystoremove = new ArrayList<>();
         Streamer.forEach((e, i) -> {
-            if (Streamer.get(e) > 5) {
+            if (Streamer.get(e) > 10) {
                 keystoremove.add(e);
             }
             Streamer.replace(e, i + 1);
