@@ -1,0 +1,12 @@
+@startuml
+title Category.isstopped
+
+actor Caller
+participant Category
+participant AtomicBoolean
+
+Caller -> Category: isstopped()
+Category -> AtomicBoolean: get()
+AtomicBoolean --> Category: boolean
+Category --> Caller: boolean
+@enduml

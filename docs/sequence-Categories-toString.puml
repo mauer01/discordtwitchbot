@@ -1,0 +1,18 @@
+@startuml
+title Categories.toString
+
+actor Caller
+participant Categories
+participant Category
+
+Caller -> Categories: toString()
+alt categorylist not empty
+  loop each category
+    Categories -> Category: getcategoryname()
+    Categories -> Categories: append name
+  end
+else empty
+  Categories -> Categories: append no categories message
+end
+Categories --> Caller: message
+@enduml

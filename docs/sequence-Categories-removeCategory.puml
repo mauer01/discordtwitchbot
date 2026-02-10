@@ -1,0 +1,19 @@
+@startuml
+title Categories.removeCategory
+
+actor Caller
+participant Categories
+participant Category
+
+Caller -> Categories: removeCategory(name, channelId)
+Categories -> Categories: getcategorybyname(name)
+alt found
+  Categories -> Category: removeChannel(channelId)
+  Categories -> Category: isstopped()
+  alt isstopped
+    Categories -> Categories: categorylist.remove(category)
+  end
+else NotFound
+  Categories -> Categories: log error
+end
+@enduml

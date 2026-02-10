@@ -1,0 +1,18 @@
+@startuml
+title Categories.getcategorybyname
+
+actor Caller
+participant Categories
+participant Category
+participant NotFound
+
+Caller -> Categories: getcategorybyname(name)
+loop each category
+  Categories -> Category: getcategoryname()
+  alt name matches
+    Categories --> Caller: category
+    stop
+  end
+end
+Categories -> NotFound: throw("category not in list")
+@enduml

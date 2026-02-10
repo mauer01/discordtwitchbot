@@ -1,0 +1,22 @@
+@startuml
+title MyTwitch.getaccesstoken
+
+actor Caller
+participant MyTwitch
+participant TwitchAuth as OAuth
+participant JsonNode
+
+Caller -> MyTwitch: getaccesstoken()
+MyTwitch -> OAuth: POST /oauth2/token
+OAuth --> MyTwitch: response
+alt status 200
+  MyTwitch -> JsonNode: getObject().getString("access_token")
+  alt token null
+    MyTwitch -> MyTwitch: log missing token
+  else token present
+    MyTwitch -> MyTwitch: set accesstoken
+  end
+else error
+  MyTwitch -> MyTwitch: log status
+end
+@enduml

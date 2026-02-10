@@ -1,0 +1,12 @@
+@startuml
+title Category.channelidexists
+
+actor Caller
+participant Category
+participant ChannelIds
+
+Caller -> Category: channelidexists(channelId)
+Category -> ChannelIds: contains(channelId)
+ChannelIds --> Category: boolean
+Category --> Caller: boolean
+@enduml

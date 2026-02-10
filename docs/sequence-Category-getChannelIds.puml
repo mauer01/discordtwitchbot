@@ -1,0 +1,14 @@
+@startuml
+title Category.getChannelIds
+
+actor Caller
+participant Category
+participant ChannelIds
+participant List
+
+Caller -> Category: getChannelIds()
+Category -> ChannelIds: snapshot
+Category -> List: new ArrayList(ChannelIds)
+List --> Category: list
+Category --> Caller: list
+@enduml

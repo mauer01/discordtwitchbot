@@ -1,0 +1,11 @@
+@startuml
+title Category.run
+
+actor Caller
+participant Category
+participant Executor as ScheduledExecutorService
+
+Caller -> Category: run()
+Category -> Executor: newScheduledThreadPool(1)
+Category -> Executor: scheduleAtFixedRate(task, 0, 10s)
+@enduml

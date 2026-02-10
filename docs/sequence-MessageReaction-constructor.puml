@@ -1,0 +1,9 @@
+@startuml
+title MessageReaction.MessageReaction
+
+actor Caller
+participant MessageReaction
+
+Caller -> MessageReaction: new(currentcategories)
+MessageReaction -> MessageReaction: set currentcategories
+@enduml

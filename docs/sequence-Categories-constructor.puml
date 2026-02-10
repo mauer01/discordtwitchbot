@@ -1,0 +1,13 @@
+@startuml
+title Categories.Categories
+
+actor Caller
+participant Categories
+participant Runtime
+participant Thread
+
+Caller -> Categories: new()
+Categories -> Runtime: getRuntime()
+Runtime -> Runtime: addShutdownHook(Thread)
+Thread -> Categories: shutdownhook()
+@enduml

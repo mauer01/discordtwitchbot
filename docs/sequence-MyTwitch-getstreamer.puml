@@ -1,0 +1,36 @@
+@startuml
+title MyTwitch.getstreamer
+
+actor Caller
+participant MyTwitch
+participant TwitchAPI as Helix
+participant JsonNode
+participant JSONArray
+
+Caller -> MyTwitch: getstreamer(categoryname)
+MyTwitch -> MyTwitch: getcategoryid(categoryname)
+alt categoryId null
+  MyTwitch --> Caller: empty list
+  stop
+end
+loop attempt 0..1
+  MyTwitch -> Helix: GET /helix/streams?game_id
+  Helix --> MyTwitch: response
+  alt status 200
+    MyTwitch -> JsonNode: getObject().optJSONArray("data")
+    alt data not null
+      MyTwitch -> JSONArray: iterate
+      MyTwitch -> MyTwitch: add user_name to list
+    else data null
+      MyTwitch -> MyTwitch: log no streamer
+    end
+    MyTwitch --> Caller: streamerList
+    stop
+  else status 401 and first attempt
+    MyTwitch -> MyTwitch: getaccesstoken()
+  else error
+    MyTwitch -> MyTwitch: log status and body
+  end
+end
+MyTwitch --> Caller: empty list
+@enduml

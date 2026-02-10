@@ -1,0 +1,22 @@
+@startuml
+title Category.sendstreamer
+
+actor Caller
+participant Category
+participant JDA
+participant TextChannel
+participant StreamerMap
+participant ChannelIds
+
+Caller -> Category: sendstreamer(channelId)
+Category -> JDA: getTextChannelById(channelId)
+alt channel null
+  Category --> Caller: return
+else Streamer not empty
+  Category -> StreamerMap: forEach(streamer)
+  Category -> TextChannel: sendMessage(stream list)
+else ChannelIds.size > 1 and Streamer empty
+  Category -> ChannelIds: size()
+  Category -> TextChannel: sendMessage(no streamer)
+end
+@enduml

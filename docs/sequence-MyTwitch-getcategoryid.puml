@@ -1,0 +1,39 @@
+@startuml
+title MyTwitch.getcategoryid
+
+actor Caller
+participant MyTwitch
+participant TwitchAPI as Helix
+participant JsonNode
+
+Caller -> MyTwitch: getcategoryid(categoryname)
+loop attempt 0..maxattempts-1
+  MyTwitch -> Helix: GET /helix/games?name
+  Helix --> MyTwitch: response
+  alt status 200
+    MyTwitch -> JsonNode: data[0].id
+    MyTwitch --> Caller: id
+    stop
+  else status 401
+    MyTwitch -> MyTwitch: getaccesstoken()
+    MyTwitch -> MyTwitch: getcategoryid(categoryname)
+    MyTwitch --> Caller: id
+    stop
+  else error
+    MyTwitch -> MyTwitch: log status
+  end
+end
+MyTwitch -> Helix: GET /helix/games?name (final attempt)
+Helix --> MyTwitch: response
+alt status 200
+  MyTwitch -> JsonNode: data[0].id
+  MyTwitch --> Caller: id
+else status 401
+  MyTwitch -> MyTwitch: getaccesstoken()
+  MyTwitch -> MyTwitch: getcategoryid(categoryname)
+  MyTwitch --> Caller: id
+else error
+  MyTwitch -> MyTwitch: log status
+end
+MyTwitch --> Caller: "-1"
+@enduml

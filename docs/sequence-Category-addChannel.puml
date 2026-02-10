@@ -1,0 +1,26 @@
+@startuml
+title Category.addChannel
+
+actor Caller
+participant Category
+participant Queue as ChannelIds
+participant JDA
+participant TextChannel
+
+Caller -> Category: addChannel(channelId)
+Category -> Category: channelidexists(channelId)
+alt not exists
+  Category -> ChannelIds: add(channelId)
+  Category -> Category: sendstreamer(channelId)
+  Category -> JDA: getTextChannelById(channelId)
+  alt channel null
+    Category --> Caller: return
+  else Streamer not empty
+    Category -> TextChannel: sendMessage(currently streaming)
+  else ChannelIds.size > 1 and Streamer empty
+    Category -> TextChannel: sendMessage(no streamer)
+  end
+else exists
+  Category --> Caller: return
+end
+@enduml

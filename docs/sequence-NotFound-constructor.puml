@@ -1,0 +1,10 @@
+@startuml
+title NotFound.NotFound
+
+actor Caller
+participant NotFound
+participant Exception
+
+Caller -> NotFound: new(errorMessage)
+NotFound -> Exception: super(errorMessage)
+@enduml

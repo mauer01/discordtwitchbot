@@ -1,0 +1,9 @@
+@startuml
+title Category.getcategoryname
+
+actor Caller
+participant Category
+
+Caller -> Category: getcategoryname()
+Category --> Caller: categoryname
+@enduml

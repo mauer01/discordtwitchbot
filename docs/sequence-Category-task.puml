@@ -1,0 +1,24 @@
+@startuml
+title Category.task
+
+actor Scheduler
+participant Category
+participant StreamerMap
+participant MyTwitch
+participant List as StreamerList
+
+Scheduler -> Category: task()
+Category -> StreamerMap: forEach(entry)
+alt count > 10
+  Category -> StreamerMap: mark for removal
+end
+Category -> StreamerMap: replace(count + 1)
+Category -> StreamerMap: remove(marked)
+Category -> MyTwitch: getstreamer(categoryname)
+MyTwitch --> Category: currentstreamer
+alt currentstreamer not empty
+  loop each streamer
+    Category -> Category: addStreamer(streamer)
+  end
+end
+@enduml

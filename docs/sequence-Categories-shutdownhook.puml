@@ -1,0 +1,21 @@
+@startuml
+title Categories.shutdownhook
+
+actor Shutdown
+participant Categories
+participant FileWriter
+participant Category
+
+Shutdown -> Categories: shutdownhook()
+Categories -> FileWriter: new("categories.txt")
+loop each category
+  Categories -> Category: getcategoryname()
+  Categories -> FileWriter: write(category line)
+  loop each channelId
+    Categories -> FileWriter: write(id line)
+  end
+end
+alt IOException
+  Categories -> Categories: log error
+end
+@enduml

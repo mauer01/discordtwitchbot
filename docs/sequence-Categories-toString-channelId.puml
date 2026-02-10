@@ -1,0 +1,20 @@
+@startuml
+title Categories.toString(channelId)
+
+actor Caller
+participant Categories
+participant Category
+
+Caller -> Categories: toString(channelId)
+loop each category
+  Categories -> Category: channelidexists(channelId)
+  alt exists
+    Categories -> Category: getcategoryname()
+    Categories -> Categories: append name
+  end
+end
+alt message empty
+  Categories -> Categories: append no categories message
+end
+Categories --> Caller: message
+@enduml

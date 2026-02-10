@@ -1,0 +1,55 @@
+@startuml
+title MessageReaction.onMessageReceived
+
+actor Discord
+participant MessageReaction
+participant MessageReceivedEvent as Event
+participant Member
+participant Categories
+participant TextChannel
+
+Discord -> MessageReaction: onMessageReceived(event)
+MessageReaction -> Event: getAuthor().getId()
+MessageReaction -> Event: getMember()
+MessageReaction -> Event: isFromGuild()
+alt member null or not guild
+  MessageReaction --> Discord: return
+  stop
+end
+MessageReaction -> Event: getAuthor().isBot()
+alt is bot
+  MessageReaction --> Discord: return
+  stop
+end
+MessageReaction -> Member: hasPermission(MANAGE_SERVER)
+alt no permission
+  MessageReaction --> Discord: return
+  stop
+end
+MessageReaction -> Event: getMessage().getContentRaw()
+alt does not start with '!'
+  MessageReaction --> Discord: return
+  stop
+end
+MessageReaction -> MessageReaction: check cooldown
+alt cooldown active
+  MessageReaction -> Event: getChannel().sendMessage(slow down)
+  MessageReaction --> Discord: return
+  stop
+end
+MessageReaction -> MessageReaction: parse command
+alt command found
+  MessageReaction -> MessageReaction: cooldowns.put(userId, currentTime)
+  alt command == ping
+    MessageReaction -> Event: getChannel().sendMessage(Pong)
+  else command contains getlist
+    MessageReaction -> Categories: toString(channelId)
+    Categories --> MessageReaction: list
+    MessageReaction -> Event: getChannel().sendMessage(list)
+  else command contains add and length > 5
+    MessageReaction -> Categories: addCategory(name, channelId)
+  else command contains remove and length > 8
+    MessageReaction -> Categories: removeCategory(name, channelId)
+  end
+end
+@enduml

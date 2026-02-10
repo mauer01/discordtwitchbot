@@ -1,0 +1,11 @@
+@startuml
+title MyTwitch.MyTwitch
+
+actor Caller
+participant MyTwitch
+
+Caller -> MyTwitch: new(clientID, clientSecret)
+MyTwitch -> MyTwitch: set clientID
+MyTwitch -> MyTwitch: set clientSecret
+MyTwitch -> MyTwitch: getaccesstoken()
+@enduml

@@ -1,0 +1,12 @@
+@startuml
+title Categories.setparams
+
+actor Caller
+participant Categories
+participant MyTwitch
+participant JDA
+
+Caller -> Categories: setparams(twitch, bot)
+Categories -> MyTwitch: store reference
+Categories -> JDA: store reference
+@enduml

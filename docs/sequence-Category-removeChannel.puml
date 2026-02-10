@@ -1,0 +1,14 @@
+@startuml
+title Category.removeChannel
+
+actor Caller
+participant Category
+participant ChannelIds
+participant AtomicBoolean
+
+Caller -> Category: removeChannel(channelId)
+Category -> ChannelIds: remove(channelId)
+alt removed and ChannelIds empty
+  Category -> AtomicBoolean: set(true)
+end
+@enduml

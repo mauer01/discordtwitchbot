@@ -1,0 +1,11 @@
+@startuml
+title Category.Category
+
+actor Caller
+participant Category
+
+Caller -> Category: new(categoryname, api, discordapi)
+Category -> Category: set categoryname
+Category -> Category: set twitchapi
+Category -> Category: set bot
+@enduml

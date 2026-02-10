@@ -1,0 +1,46 @@
+@startuml
+title DiscordTwitchBot.main
+
+actor Caller
+participant DiscordTwitchBot
+participant Dotenv
+participant Categories
+participant JDABuilder
+participant JDA
+participant MessageReaction
+participant MyTwitch
+participant Files
+
+Caller -> DiscordTwitchBot: main(args)
+DiscordTwitchBot -> Dotenv: load()
+Dotenv --> DiscordTwitchBot: env
+DiscordTwitchBot -> Categories: new()
+DiscordTwitchBot -> JDABuilder: createDefault(token)
+JDABuilder -> JDABuilder: setStatus(ONLINE)
+JDABuilder -> JDABuilder: setActivity(playing(status))
+DiscordTwitchBot -> MessageReaction: new(currentcategories)
+JDABuilder -> JDABuilder: addEventListeners(listener)
+JDABuilder -> JDABuilder: enableIntents(MESSAGE_CONTENT)
+JDABuilder -> JDA: build()
+DiscordTwitchBot -> MyTwitch: new(twitchClientId, twitchClientSecret)
+DiscordTwitchBot -> JDA: awaitReady()
+alt InterruptedException
+  DiscordTwitchBot -> DiscordTwitchBot: log error
+end
+DiscordTwitchBot -> Categories: setparams(twitch, bot)
+DiscordTwitchBot -> Files: readAllLines(categories.txt)
+alt file missing
+  DiscordTwitchBot -> DiscordTwitchBot: log message
+else io error
+  DiscordTwitchBot -> DiscordTwitchBot: log error
+else success
+  loop each line
+    DiscordTwitchBot -> DiscordTwitchBot: parse context and value
+    alt context == category
+      DiscordTwitchBot -> DiscordTwitchBot: set currentcategory
+    else context == id
+      DiscordTwitchBot -> Categories: addCategory(currentcategory, value)
+    end
+  end
+end
+@enduml

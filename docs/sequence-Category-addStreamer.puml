@@ -1,0 +1,16 @@
+@startuml
+title Category.addStreamer
+
+actor Caller
+participant Category
+participant StreamerMap
+
+Caller -> Category: addStreamer(name)
+Category -> StreamerMap: containsKey(name)
+alt not present
+  Category -> StreamerMap: put(name, 0)
+  Category -> Category: newStreamer(name)
+else present
+  Category -> StreamerMap: put(name, 0)
+end
+@enduml

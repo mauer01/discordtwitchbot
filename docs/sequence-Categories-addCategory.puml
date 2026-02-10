@@ -1,0 +1,19 @@
+@startuml
+title Categories.addCategory
+
+actor Caller
+participant Categories
+participant Category
+participant NotFound
+
+Caller -> Categories: addCategory(name, channelId)
+Categories -> Categories: getcategorybyname(name)
+alt found
+  Categories -> Category: addChannel(channelId)
+else NotFound
+  Categories -> Category: new(name, twitch, bot)
+  Categories -> Category: addChannel(channelId)
+  Categories -> Categories: categorylist.add(category)
+  Categories -> Category: start()
+end
+@enduml

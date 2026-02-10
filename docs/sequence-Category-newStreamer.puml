@@ -1,0 +1,16 @@
+@startuml
+title Category.newStreamer
+
+actor Caller
+participant Category
+participant ChannelIds
+participant JDA
+participant TextChannel
+
+Caller -> Category: newStreamer(name)
+Category -> ChannelIds: forEach(channelId)
+Category -> JDA: getTextChannelById(channelId)
+alt channel not null
+  Category -> TextChannel: sendMessage(new streamer)
+end
+@enduml
