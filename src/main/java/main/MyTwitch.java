@@ -89,16 +89,10 @@ public class MyTwitch {
         int maxattempts = 2;
         for (int attempt = 0; attempt < maxattempts; attempt++) {
             try {
-                HttpResponse<JsonNode> response = Unirest.get("https://api.twitch.tv/helix/games")
-                        .queryString("name", categoryname)
-                        .header("Client-ID", this.clientID)
-                        .header("Authorization", "Bearer " + this.accesstoken)
-                        .asJson();
+                HttpResponse<JsonNode> response = findGameByName(categoryname);
                 if (response.getStatus() == 200) {
 
-                    String id = response.getBody().getObject().optJSONArray("data").getJSONObject(0).getString("id");
-
-                    return id;
+                    return response.getBody().getObject().optJSONArray("data").getJSONObject(0).getString("id");
                 } else {
                     if (response.getStatus() == 401) {
                         this.getaccesstoken();
@@ -111,30 +105,15 @@ public class MyTwitch {
                 return "-1";
             }
         }
-        try {
-            HttpResponse<JsonNode> response = Unirest.get("https://api.twitch.tv/helix/games")
-                    .queryString("name", categoryname)
-                    .header("Client-ID", this.clientID)
-                    .header("Authorization", "Bearer " + this.accesstoken)
-                    .asJson();
-            if (response.getStatus() == 200) {
-
-                String id = response.getBody().getObject().optJSONArray("data").getJSONObject(0).getString("id");
-
-                return id;
-            } else {
-                if (response.getStatus() == 401) {
-                    this.getaccesstoken();
-                    return getcategoryid(categoryname);
-                } else {
-                    System.err.println("Failed to get the ID. Status code: " + response.getStatus());
-                }
-            }
-        } catch (UnirestException | JSONException e) {
-            return "-1";
-        }
         return "-1";
+    }
 
+    private HttpResponse<JsonNode> findGameByName(String categoryname) throws UnirestException {
+        return Unirest.get("https://api.twitch.tv/helix/games")
+                .queryString("name", categoryname)
+                .header("Client-ID", this.clientID)
+                .header("Authorization", "Bearer " + this.accesstoken)
+                .asJson();
     }
 
 }

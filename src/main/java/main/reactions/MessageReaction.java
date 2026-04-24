@@ -14,7 +14,6 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 public class MessageReaction extends ListenerAdapter {
 
     private final Categories currentcategories;
-    private final String commandidentifier = "!";
     private final Map<String, Long> cooldowns = new ConcurrentHashMap<>();
     private final Map<String, String> pingroles;
 
@@ -39,6 +38,7 @@ public class MessageReaction extends ListenerAdapter {
         if (!member.hasPermission(Permission.MANAGE_SERVER)) {
             return;
         }
+        String commandidentifier = "!";
         if (!event.getMessage().getContentRaw().startsWith(commandidentifier)) {
             return;
         }

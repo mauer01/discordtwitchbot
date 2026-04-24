@@ -16,8 +16,12 @@ import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import io.github.cdimascio.dotenv.Dotenv;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DiscordTwitchBot {
+
+    private static final Logger log = LoggerFactory.getLogger(DiscordTwitchBot.class);
 
     public static void main(String[] args) {
         Map<String, String> pingRoles = new ConcurrentHashMap<>();
@@ -38,7 +42,7 @@ public class DiscordTwitchBot {
         try {
             bot.awaitReady();
         } catch (InterruptedException e) {
-            System.err.println(e);
+            log.error("e: ", e);
         }
         currentcategories.setParams(twitch, bot);
         try {
@@ -58,7 +62,7 @@ public class DiscordTwitchBot {
         } catch (FileNotFoundException e) {
             System.out.println("Categories.txt wurde noch nicht angelegt, App funktioniert trotzdem");
         } catch (IOException e) {
-            System.out.println(e + System.lineSeparator() + "");
+            System.out.println(e + System.lineSeparator());
         }
 
     }
