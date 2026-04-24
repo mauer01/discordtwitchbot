@@ -22,9 +22,10 @@ public class Category extends Thread {
     private final AtomicBoolean isstopped = new AtomicBoolean(false);
     private final JDA bot;
     private List<String> currentstreamer = null;
+    private final Map<String, String> pingRoles;
 
-    public Category(String categoryname, MyTwitch API, JDA discordapi) {
-
+    public Category(String categoryname, MyTwitch API, JDA discordapi, Map<String, String> pingRoles) {
+        this.pingRoles = pingRoles;
         this.categoryname = categoryname;
         this.twitchapi = API;
         this.bot = discordapi;
@@ -69,7 +70,7 @@ public class Category extends Thread {
     public void run() {
         ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
 
-        executor.scheduleAtFixedRate(() -> task(), 0, 10, TimeUnit.SECONDS);
+        executor.scheduleAtFixedRate(this::task, 0, 10, TimeUnit.SECONDS);
     }
 
     private void task() {
@@ -103,12 +104,12 @@ public class Category extends Thread {
     }
 
     void newStreamer(String x) {
-        StringBuilder message = new StringBuilder("New streamer is currently streaming " + categoryname + ":");
+        StringBuilder message = new StringBuilder("Streamer went Live in: " + categoryname + ":");
         message.append("\nhttps://www.twitch.tv/").append(x);
         ChannelIds.forEach((channelid) -> {
             TextChannel channel = bot.getTextChannelById(channelid);
             if (channel != null) {
-                channel.sendMessage(message.toString()).queue();
+                channel.sendMessage(pingRoles.get(channelid) + " " + message.toString()).queue();
             }
         });
     }

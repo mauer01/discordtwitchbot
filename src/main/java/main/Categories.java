@@ -4,62 +4,63 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import main.exceptions.NotFound;
 import net.dv8tion.jda.api.JDA;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Categories {
 
+    private static final Logger log = LoggerFactory.getLogger(Categories.class);
     private final List<Category> categorylist = new ArrayList<>();
     private MyTwitch twitch;
     private JDA bot;
+    private final Map<String, String> pingRole;
 
-    public Categories() {
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            shutdownhook();
-        }, "Shutdown-thread"));
+    public Categories(Map<String, String> pingRoles) {
+        this.pingRole = pingRoles;
+        Runtime.getRuntime().addShutdownHook(new Thread(this::shutdownHook, "Shutdown-thread"));
     }
 
-    public void shutdownhook() {
+    public void shutdownHook() {
         try {
-            try (FileWriter categoriestext = new FileWriter("categories.txt")) {
+            try (FileWriter categoriesText = new FileWriter("categories.txt")) {
                 for (Category category : categorylist) {
-                    categoriestext.write("category:" + category.getcategoryname() + "\n");
-                    for (String channelid : category.getChannelIds()) {
-                        categoriestext.write("id:" + channelid + "\n");
+                    categoriesText.write("category:" + category.getcategoryname() + "\n");
+                    for (String channelId : category.getChannelIds()) {
+                        categoriesText.write("id:" + channelId + ":" + pingRole.get(channelId) + "\n");
                     }
                 }
             }
         } catch (IOException e) {
-            System.out.println(e);
+            log.error("e: ", e);
         }
     }
 
-    public void setparams(MyTwitch x, JDA y) {
+    public void setParams(MyTwitch x, JDA y) {
         this.twitch = x;
         this.bot = y;
     }
 
-    public void addCategory(String x, String channelid) {
+    public void addCategory(String x, String channelId) {
         try {
-            Category y = getcategorybyname(x);
-            y.addChannel(channelid);
+            Category y = findCategoryByName(x);
+            y.addChannel(channelId);
         } catch (NotFound e) {
-            Category temp = new Category(x, twitch, bot);
-            temp.addChannel(channelid);
+            Category temp = new Category(x, twitch, bot, pingRole);
+            temp.addChannel(channelId);
             this.categorylist.add(temp);
             temp.start();
         }
     }
 
-    public List<Category> getCategories() {
-        return this.categorylist;
-    }
 
     public void removeCategory(String name, String channel) {
         Category x;
         try {
-            x = getcategorybyname(name);
+            x = findCategoryByName(name);
             x.removeChannel(channel);
 
             if (x.isstopped()) {
@@ -70,7 +71,7 @@ public class Categories {
         }
     }
 
-    public Category getcategorybyname(String x) throws NotFound {
+    public Category findCategoryByName(String x) throws NotFound {
         for (Category category : categorylist) {
             if (category.getcategoryname().equals(x)) {
                 return category;
@@ -85,7 +86,7 @@ public class Categories {
         if (!categorylist.isEmpty()) {
             for (Category category : categorylist) {
                 message.append(category.getcategoryname());
-                message.append(System.getProperty("line.separator"));
+                message.append(System.lineSeparator());
             }
         } else {
             message.append("there are no categories set yet.");
@@ -101,7 +102,7 @@ public class Categories {
                 message.append(System.lineSeparator());
             }
         }
-        if (message.toString().equals("")) {
+        if (message.toString().isEmpty()) {
             message.append("There are no categories set for this channel!");
         }
         return message.toString();

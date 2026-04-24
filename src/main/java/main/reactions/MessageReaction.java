@@ -16,8 +16,10 @@ public class MessageReaction extends ListenerAdapter {
     private final Categories currentcategories;
     private final String commandidentifier = "!";
     private final Map<String, Long> cooldowns = new ConcurrentHashMap<>();
+    private final Map<String, String> pingroles;
 
-    public MessageReaction(Categories current) {
+    public MessageReaction(Categories current, Map<String, String> pingroles) {
+        this.pingroles = pingroles;
         this.currentcategories = current;
 
     }
@@ -62,6 +64,10 @@ public class MessageReaction extends ListenerAdapter {
                 } else if (command.contains("remove") && messageContent.length() > 8) {
                     this.currentcategories.removeCategory(event.getMessage().getContentRaw().substring(8),
                             event.getChannel().getId());
+                } else if (command.contains("role")) {
+                    String substring = event.getMessage().getContentRaw().substring(6);
+                    pingroles.put(event.getChannel().getId(), substring);
+                    event.getChannel().sendMessage(substring + " role set!").queue();
                 }
             }
         }
