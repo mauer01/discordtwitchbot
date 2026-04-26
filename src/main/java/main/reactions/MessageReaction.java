@@ -8,6 +8,7 @@ import java.util.regex.Pattern;
 import main.Categories;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
@@ -28,6 +29,7 @@ public class MessageReaction extends ListenerAdapter {
         String userId = event.getAuthor().getId();
         Member member = event.getMember();
         long currentTime = System.currentTimeMillis();
+        String commandidentifier = "!";
 
         if (member == null || !event.isFromGuild()) {
             return;
@@ -35,21 +37,44 @@ public class MessageReaction extends ListenerAdapter {
         if (event.getAuthor().isBot()) {
             return;
         }
-        if (!member.hasPermission(Permission.MANAGE_SERVER)) {
-            return;
-        }
-        String commandidentifier = "!";
         if (!event.getMessage().getContentRaw().startsWith(commandidentifier)) {
             return;
         }
         String messageContent = event.getMessage().getContentRaw();
+        Pattern pattern = Pattern.compile("!([a-zA-Z]+)");
+        Matcher matcher = pattern.matcher(messageContent);
+
         if (cooldowns.containsKey(userId) && (currentTime - cooldowns.get(userId)) < 5000) {
             event.getChannel().sendMessage("Slow down! Wait a few seconds before using commands again.").queue();
             return;
         }
-        Pattern pattern = Pattern.compile("!([a-zA-Z]+)");
-        Matcher matcher = pattern.matcher(messageContent);
+        if (matcher.find()) {
+            String command = matcher.group(1).toLowerCase();
+            if (command.equals("get_role")) {
+                String roleId = pingroles.get(event.getChannel().getId());
 
+                if (roleId == null || roleId.isBlank()) {
+                    event.getChannel().sendMessage("No role has been set for this channel.").queue();
+                    return;
+                }
+                roleId = roleId.replaceAll("[^0-9]", "");
+                Role role = event.getGuild().getRoleById(roleId);
+
+                if (role == null) {
+                    event.getChannel().sendMessage("The configured role could not be found.").queue();
+                    return;
+                }
+
+                event.getGuild().addRoleToMember(member, role).queue(
+                        success -> event.getChannel().sendMessage("Role added!").queue(),
+                        error -> event.getChannel().sendMessage("I could not add that role. Check my permissions.").queue()
+                );
+                return;
+            }
+        }
+        if (!member.hasPermission(Permission.MANAGE_SERVER)) {
+            return;
+        }
         if (matcher.find()) {
             String command = matcher.group(1).toLowerCase();
             cooldowns.put(userId, currentTime); // Add user to cooldown list
