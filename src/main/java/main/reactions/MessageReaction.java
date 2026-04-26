@@ -50,7 +50,7 @@ public class MessageReaction extends ListenerAdapter {
         }
         if (matcher.find()) {
             String command = matcher.group(1).toLowerCase();
-            if (command.equals("get_role")) {
+            if (command.equals("getrole")) {
                 String roleId = pingroles.get(event.getChannel().getId());
 
                 if (roleId == null || roleId.isBlank()) {

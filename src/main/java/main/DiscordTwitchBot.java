@@ -36,7 +36,7 @@ public class DiscordTwitchBot {
         builder.setStatus(OnlineStatus.ONLINE);
         builder.setActivity(Activity.customStatus(status));
         builder.addEventListeners(new MessageReaction(currentcategories, pingRoles));
-        builder.enableIntents(GatewayIntent.MESSAGE_CONTENT);
+        builder.enableIntents(GatewayIntent.MESSAGE_CONTENT, GatewayIntent.GUILD_MEMBERS);
         JDA bot = builder.build();
         MyTwitch twitch = new MyTwitch(twitchClientId, twitchClientSecret);
         try {
